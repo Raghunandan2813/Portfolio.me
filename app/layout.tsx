@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ResumeChat } from "./components/ResumeChat";
 import { SiteNav } from "./components/SiteNav";
+import { ThemeProvider } from "./components/ThemeProvider";
 import {
   CONTACT_EMAIL,
   GITHUB_PROFILE_URL,
@@ -91,11 +92,16 @@ const personSchema = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning is required by next-themes: its pre-paint script
+    // sets data-theme on <html>, so the server and client markup differ here by
+    // design.
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <SiteNav />
-        {children}
-        <ResumeChat />
+        <ThemeProvider>
+          <SiteNav />
+          {children}
+          <ResumeChat />
+        </ThemeProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       </body>
     </html>

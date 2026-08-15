@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function SiteNav() {
   return (
@@ -7,10 +8,9 @@ export function SiteNav() {
         <Link className="nav-brand" href="/#top" aria-label="Raghunandan Kumar home">
           <span>RK</span>
         </Link>
-        <Link className="nav-search" href="/#work" aria-label="Search through Raghunandan's work">
+        <Link className="nav-search" href="/#work" aria-label="Jump to my work">
           <i aria-hidden="true">⌕</i>
-          <span>Search my work</span>
-          <kbd>⌘ K</kbd>
+          <span>Browse my work</span>
         </Link>
         <nav className="nav-links" aria-label="Primary navigation">
           <Link href="/#top"><b>⌂</b><span>Profile</span></Link>
@@ -19,9 +19,9 @@ export function SiteNav() {
           <Link href="/#stack"><b>✦</b><span>Stack</span></Link>
           <Link href="/#contact"><b>✉</b><span>Contact</span></Link>
         </nav>
-        <a className="nav-resume" href="/resume/raghunandan-kumar-resume.pdf" download>
-          Resume <span>↓</span>
-        </a>
+        {/* The resume download lives on the profile banner only, so there is a
+            single, unambiguous entry point for it. */}
+        <ThemeToggle />
       </div>
     </header>
   );

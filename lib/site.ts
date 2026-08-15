@@ -48,6 +48,12 @@ export const LINKEDIN_URL =
 export const GITHUB_USERNAME = "Raghunandan2813";
 export const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
 
+/**
+ * Profile photo. Drop a square image at `public/profile.jpg` — the avatar
+ * component falls back to the "RK" monogram until it exists.
+ */
+export const PROFILE_PHOTO = "/profile.jpg";
+
 /** 1200×630 is the size LinkedIn, X, Slack and iMessage all expect. */
 export const OG_IMAGE = {
   url: "/og.png",
