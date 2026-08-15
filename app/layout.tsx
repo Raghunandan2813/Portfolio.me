@@ -14,6 +14,7 @@ import {
   SITE_NAME,
   SITE_TITLE,
   SITE_URL,
+  PROFILE_PHOTO,
   absoluteUrl,
 } from "@/lib/site";
 
@@ -61,35 +62,86 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+  // Search Console / Bing verification. Set the env vars after claiming the
+  // property; the HTML-tag method is the one that survives redeploys.
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+    other: process.env.NEXT_PUBLIC_BING_VERIFICATION
+      ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION }
+      : undefined,
+  },
 };
 
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${SITE_URL}/#person`,
   name: SITE_NAME,
+  alternateName: "Raghunandan",
+  givenName: "Raghunandan",
+  familyName: "Kumar",
   jobTitle: "Full Stack and Agentic AI Engineer",
+  description: SITE_DESCRIPTION,
   url: SITE_URL,
+  mainEntityOfPage: SITE_URL,
   email: `mailto:${CONTACT_EMAIL}`,
-  image: absoluteUrl(OG_IMAGE.url),
+  image: absoluteUrl(PROFILE_PHOTO),
+  nationality: { "@type": "Country", name: "India" },
   address: {
     "@type": "PostalAddress",
     addressLocality: "Kushinagar",
+    addressRegion: "Uttar Pradesh",
     addressCountry: "IN",
   },
   alumniOf: {
     "@type": "CollegeOrUniversity",
     name: "Guru Ghasidas Vishwavidyalaya",
+    address: { "@type": "PostalAddress", addressLocality: "Bilaspur", addressCountry: "IN" },
   },
+  worksFor: { "@type": "Organization", name: "Snorkel AI" },
+  // sameAs is the strongest entity signal available: it tells Google these
+  // profiles and this site are the same person.
   sameAs: [GITHUB_PROFILE_URL, LINKEDIN_URL],
   knowsAbout: [
     "Next.js",
+    "React",
     "TypeScript",
     "Python",
     "FastAPI",
-    "RAG",
+    "Retrieval-Augmented Generation",
     "LangGraph",
-    "MCP",
+    "LangChain",
+    "Agentic AI",
+    "PostgreSQL",
+    "Model Context Protocol",
   ],
+};
+
+/** Declares the site itself and binds it to the person entity. */
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: `${SITE_NAME} - Portfolio`,
+  description: SITE_DESCRIPTION,
+  inLanguage: "en",
+  publisher: { "@id": `${SITE_URL}/#person` },
+};
+
+/**
+ * ProfilePage tells Google the homepage IS the person's profile, which is what
+ * makes it eligible to surface for a name query rather than a generic result.
+ */
+const profilePageSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "@id": `${SITE_URL}/#profilepage`,
+  url: SITE_URL,
+  name: SITE_TITLE,
+  isPartOf: { "@id": `${SITE_URL}/#website` },
+  about: { "@id": `${SITE_URL}/#person` },
+  inLanguage: "en",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -108,7 +160,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <BirdFlight />
           <CursorCat />
         </ThemeProvider>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([personSchema, websiteSchema, profilePageSchema]),
+          }}
+        />
       </body>
     </html>
   );

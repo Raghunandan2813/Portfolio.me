@@ -51,11 +51,30 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     keywords: project.stack.join(", "),
   };
 
+  // Breadcrumbs render as a path under the result in Google, replacing the
+  // raw URL, and reinforce site structure.
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Projects", item: absoluteUrl("/projects") },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: project.title,
+        item: absoluteUrl(`/projects/${project.slug}`),
+      },
+    ],
+  };
+
   return (
     <main className={`case-page ${project.accent}`}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(projectSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([projectSchema, breadcrumbSchema]),
+        }}
       />
       <div className="page-shell">
         <Link className="case-back" href="/projects">← All projects</Link>
