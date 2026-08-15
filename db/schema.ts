@@ -16,3 +16,25 @@ export const contactMessages = sqliteTable("contact_messages", {
   status: text("status").notNull().default("new"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+/**
+ * Fixed-window rate limit counters. `key` encodes both the bucket and the
+ * window (e.g. `contact:1.2.3.4:29174`) so an expired window is simply a row
+ * nobody reads again; `expiresAt` exists so those rows can be swept.
+ */
+export const rateLimits = sqliteTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull().default(0),
+  expiresAt: integer("expires_at").notNull(),
+});
+
+/**
+ * Response cache for third-party APIs (currently GitHub). Stale rows are kept
+ * rather than deleted so a failing upstream can still be served from cache.
+ */
+export const cacheEntries = sqliteTable("cache_entries", {
+  key: text("key").primaryKey(),
+  payload: text("payload").notNull(),
+  freshUntil: integer("fresh_until").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});

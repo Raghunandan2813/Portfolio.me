@@ -1,3 +1,6 @@
+import { cachedJson } from "@/lib/cache";
+import { GITHUB_USERNAME, githubFetch } from "@/lib/github";
+
 type GithubRepo = {
   name: string;
   html_url: string;
@@ -9,36 +12,54 @@ type GithubRepo = {
   archived: boolean;
 };
 
+type Repo = {
+  name: string;
+  url: string;
+  description: string;
+  language: string | null;
+  stars: number;
+  updatedAt: string;
+};
+
+const CACHE_KEY = "github:repos:v1";
+const CACHE_TTL_SECONDS = 60 * 60 * 6;
+
+async function fetchRepos(): Promise<Repo[]> {
+  const response = await githubFetch(
+    `/users/${GITHUB_USERNAME}/repos?sort=updated&direction=desc&per_page=12`,
+  );
+
+  return ((await response.json()) as GithubRepo[])
+    .filter((repo) => !repo.fork && !repo.archived)
+    .slice(0, 4)
+    .map((repo) => ({
+      name: repo.name,
+      url: repo.html_url,
+      description: repo.description || "A public project from my GitHub workspace.",
+      language: repo.language,
+      stars: repo.stargazers_count,
+      updatedAt: repo.updated_at,
+    }));
+}
+
 export async function GET() {
-  try {
-    const response = await fetch(
-      "https://api.github.com/users/Raghunandan2813/repos?sort=updated&direction=desc&per_page=12",
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          "User-Agent": "Raghunandan-Portfolio",
-        },
-      },
-    );
+  const result = await cachedJson(CACHE_KEY, CACHE_TTL_SECONDS, fetchRepos);
 
-    if (!response.ok) throw new Error("GitHub request failed");
-    const repos = ((await response.json()) as GithubRepo[])
-      .filter((repo) => !repo.fork && !repo.archived)
-      .slice(0, 4)
-      .map((repo) => ({
-        name: repo.name,
-        url: repo.html_url,
-        description: repo.description || "A public project from my GitHub workspace.",
-        language: repo.language,
-        stars: repo.stargazers_count,
-        updatedAt: repo.updated_at,
-      }));
-
+  if (!result) {
     return Response.json(
-      { repos },
-      { headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400" } },
+      { repos: [], stale: true },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
     );
-  } catch {
-    return Response.json({ repos: [] }, { status: 503 });
   }
+
+  return Response.json(
+    { repos: result.value, stale: !result.fresh },
+    {
+      headers: {
+        // Browser-level caching on top of the D1 cache. `stale-while-revalidate`
+        // keeps the feed instant on repeat views.
+        "Cache-Control": "public, max-age=600, stale-while-revalidate=86400",
+      },
+    },
+  );
 }

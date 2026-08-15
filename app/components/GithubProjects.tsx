@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GITHUB_PROFILE_URL } from "@/lib/site";
 
 type Repo = {
   name: string;
@@ -14,7 +15,7 @@ type Repo = {
 const fallbackRepos: Repo[] = [
   {
     name: "Mindly-Ai-Agent",
-    url: "https://github.com/Raghunandan2813/Mindly-Ai-Agent",
+    url: `${GITHUB_PROFILE_URL}/Mindly-Ai-Agent`,
     description: "Persistent memory agent with semantic retrieval and knowledge graphs.",
     language: "TypeScript",
     stars: 0,
@@ -22,7 +23,7 @@ const fallbackRepos: Repo[] = [
   },
   {
     name: "ai-interview-coach",
-    url: "https://github.com/Raghunandan2813/ai-interview-coach",
+    url: `${GITHUB_PROFILE_URL}/ai-interview-coach`,
     description: "Real-time voice interview practice with structured AI feedback.",
     language: "TypeScript",
     stars: 0,
