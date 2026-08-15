@@ -69,7 +69,8 @@ export const projects: Project[] = [
     stack: ["Next.js 16", "TypeScript", "Vapi", "Groq", "Firebase", "Face-API.js", "Zod"],
     liveUrl: "https://interview-with-ai-alpha.vercel.app/sign-in",
     githubUrl: "https://github.com/raghunandan2813/ai-interview-coach",
-    demoVideo: null,
+    demoVideo: "/videos/ai-interview-coach-demo.mp4",
+    demoPoster: null,
     accent: "blue",
   },
   {
