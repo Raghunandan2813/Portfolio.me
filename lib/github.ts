@@ -5,14 +5,14 @@ export { GITHUB_PROFILE_URL, GITHUB_USERNAME } from "./site";
 /**
  * Calls the GitHub REST API.
  *
- * Unauthenticated requests are limited to 60/hour **per IP**, and a Cloudflare
- * Worker shares its egress IPs with many other tenants, so in practice that
- * budget is always exhausted. Setting `GITHUB_TOKEN` (a fine-grained token with
- * no scopes is enough for public data) raises the limit to 5,000/hour and is
- * what makes these feeds reliable in production.
+ * Unauthenticated requests are limited to 60/hour **per IP**, and serverless
+ * functions share egress IPs across many tenants, so in practice that budget is
+ * always exhausted. Setting `GITHUB_TOKEN` (a fine-grained token with no scopes
+ * is enough for public data) raises the limit to 5,000/hour and is what makes
+ * these feeds reliable in production.
  */
 export async function githubFetch(path: string): Promise<Response> {
-  const token = await readEnv("GITHUB_TOKEN");
+  const token = readEnv("GITHUB_TOKEN");
 
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",

@@ -1,33 +1,26 @@
 /**
- * Reads a configuration value.
+ * Reads a configuration value from the environment.
  *
- * Wrangler exposes plain `vars` on `process.env` under `nodejs_compat`, but
- * secrets are only reliably present on the Worker env object. Checking both
- * keeps local `.env` development and deployed secrets on the same code path.
+ * On Vercel every var and secret is exposed through `process.env`, so this is a
+ * thin wrapper that normalises empty strings to `undefined`.
  */
-export async function readEnv(name: string): Promise<string | undefined> {
-  const fromProcess = process.env[name];
-  if (fromProcess) return fromProcess;
-
-  try {
-    const { env } = await import("cloudflare:workers");
-    const value = (env as unknown as Record<string, unknown>)[name];
-    return typeof value === "string" && value.length > 0 ? value : undefined;
-  } catch {
-    return undefined;
-  }
+export function readEnv(name: string): string | undefined {
+  const value = process.env[name];
+  return value && value.length > 0 ? value : undefined;
 }
 
 /**
- * Best-effort client IP. Cloudflare always sets `cf-connecting-ip`; the other
- * headers only matter for local development and proxies in front of the Worker.
+ * Best-effort client IP.
+ *
+ * Vercel terminates TLS at its edge and sets `x-forwarded-for`, whose first
+ * entry is the original client. `request.ip` is not available in route
+ * handlers, so the header is the supported path.
  */
 export function clientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   return (
-    request.headers.get("cf-connecting-ip") ||
-    request.headers.get("x-real-ip") ||
     forwarded?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
     "unknown"
   );
 }

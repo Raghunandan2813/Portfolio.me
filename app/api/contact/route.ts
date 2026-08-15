@@ -21,15 +21,15 @@ type Enquiry = { name: string; email: string; type: string; message: string };
  * a fully-dropped message apart from one that is at least stored.
  */
 async function deliverEmail(enquiry: Enquiry): Promise<boolean> {
-  const apiKey = await readEnv("RESEND_API_KEY");
-  const destination = await readEnv("CONTACT_EMAIL");
+  const apiKey = readEnv("RESEND_API_KEY");
+  const destination = readEnv("CONTACT_EMAIL");
 
   if (!apiKey || !destination) {
     console.warn("Contact email skipped: RESEND_API_KEY or CONTACT_EMAIL unset");
     return false;
   }
 
-  const from = (await readEnv("CONTACT_FROM")) || "Portfolio <onboarding@resend.dev>";
+  const from = readEnv("CONTACT_FROM") || "Portfolio <onboarding@resend.dev>";
 
   try {
     const response = await fetch("https://api.resend.com/emails", {

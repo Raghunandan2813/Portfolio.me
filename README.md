@@ -1,18 +1,15 @@
 # Raghunandan Kumar — Portfolio
 
 Personal portfolio and case-study site for a Full Stack & Agentic AI Engineer.
-Built on [vinext](https://github.com/cloudflare/vinext) (Next.js App Router on
-Cloudflare Workers) with Cloudflare D1 + Drizzle for persistence.
-
-**Live:** set `NEXT_PUBLIC_SITE_URL` — see [Configuration](#configuration).
+Next.js App Router on Vercel, with Supabase Postgres and Drizzle ORM.
 
 ## Stack
 
 | Layer | Choice |
 | --- | --- |
-| Framework | Next.js 16 (App Router, RSC) via vinext |
-| Runtime | Cloudflare Workers |
-| Database | Cloudflare D1 (SQLite) + Drizzle ORM |
+| Framework | Next.js 16 (App Router, RSC) |
+| Hosting | Vercel |
+| Database | Supabase Postgres + Drizzle ORM (postgres-js) |
 | Styling | Hand-written CSS with design tokens, Tailwind v4 available |
 | Email | Resend |
 
@@ -31,80 +28,77 @@ Cloudflare Workers) with Cloudflare D1 + Drizzle for persistence.
 
 ## Configuration
 
-Copy `.env.example` to `.env` for local work, and set the same keys as secrets
-in the hosting dashboard for production.
+Copy `.env.example` to `.env` locally, and set the same keys in
+**Vercel → Settings → Environment Variables** for production.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
+| `DATABASE_URL` | **Yes** | Supabase **transaction pooler** string (port 6543). |
+| `DIRECT_URL` | For migrations | Supabase **direct** connection (port 5432), used only by drizzle-kit. |
 | `NEXT_PUBLIC_SITE_URL` | **Yes** | Canonical origin. Drives canonical tags, sitemap, and absolute OG image URLs. |
-| `GITHUB_TOKEN` | Strongly recommended | Raises the GitHub API limit from 60/hr per shared IP to 5,000/hr. Without it both GitHub feeds degrade to cached or empty data. A fine-grained token with **no scopes** is sufficient. |
-| `RESEND_API_KEY` | Recommended | Enables contact-form email notifications. Without it messages are still stored in D1. |
+| `GITHUB_TOKEN` | Strongly recommended | Raises the GitHub API limit from 60/hr per IP to 5,000/hr. Without it both GitHub feeds degrade to cached or empty data. A fine-grained token with **no scopes** is enough. |
+| `RESEND_API_KEY` | Recommended | Enables contact-form email. Without it messages are still stored in Postgres. |
 | `CONTACT_EMAIL` | With Resend | Notification destination. |
-| `CONTACT_FROM` | No | Verified sender address. Defaults to the Resend shared sender. |
+| `CONTACT_FROM` | No | Verified sender. Defaults to the Resend shared sender. |
+
+### Why two database URLs
+
+Vercel serverless functions open a connection per invocation, so the app must
+talk to Postgres through Supabase's PgBouncer **transaction pooler** or it will
+exhaust the connection limit. PgBouncer in transaction mode cannot use prepared
+statements, which is why `db/index.ts` sets `prepare: false`.
+
+Migrations need DDL that PgBouncer restricts, so drizzle-kit uses `DIRECT_URL`
+instead. This split is normal for Supabase on serverless.
 
 ## Reliability notes
 
 Three deliberate design decisions worth knowing before changing this code:
 
 1. **The contact route delivers and persists independently.** `deliverEmail()`
-   and `storeEnquiry()` both swallow their own errors and run under
-   `Promise.all`, so a D1 outage cannot prevent the email and a Resend outage
-   cannot prevent the stored copy. Only a both-failed case returns an error to
-   the visitor. Do not reintroduce a sequence where one can throw before the
-   other runs.
+   and `storeEnquiry()` each swallow their own errors and run under
+   `Promise.all`, so a database outage cannot prevent the email and a Resend
+   outage cannot prevent the stored copy. Only a both-failed case returns an
+   error. Do not reintroduce a sequence where one can throw before the other
+   runs.
 
-2. **GitHub responses go through a D1 read-through cache with stale-on-error.**
+2. **GitHub responses go through a read-through cache with stale-on-error.**
    See `lib/cache.ts`. When the API fails, an expired cache entry is served in
    preference to an empty feed. `/api/github-activity` caches the raw event
    counts, not the rendered calendar, so a cached response still ends on
    today's date.
 
 3. **Rate limiting fails open.** `lib/rate-limit.ts` allows the request through
-   if D1 is unreachable. Losing a real enquiry is worse than admitting spam,
-   and every route validates independently.
+   if the database is unreachable. Losing a real enquiry is worse than
+   admitting spam, and every route validates independently.
 
 ## Development
 
 ```bash
-npm run install:ci    # one bounded lockfile install
-npm run dev           # Vite + vinext dev server
-npm run build         # build and validate the deployable Sites artifact
-npm test              # build, validate, verify rendered preview metadata
-npm run lint          # eslint
+npm install
+npm run dev           # http://localhost:3000
+npm run build         # production build
+npm run typecheck     # tsc --noEmit
+npm run lint
 ```
 
 Database and assets:
 
 ```bash
-npm run db:generate   # regenerate Drizzle migrations after editing db/schema.ts
-npm run og:generate   # re-render public/og.png (Node-side; run after copy edits)
+npm run db:generate   # generate migrations after editing db/schema.ts
+npm run db:migrate    # apply migrations (uses DIRECT_URL)
+npm run db:studio     # browse data
+npm run og:generate   # re-render public/og.png after copy changes
 ```
 
-`og:generate` runs in Node rather than in the Worker on purpose: `next/og`
-pulls in satori and resvg WASM, which would consume a large share of the Worker
-size budget if it ran at request time.
+`og:generate` runs in Node at authoring time rather than at request time:
+`next/og` pulls in satori and resvg WASM, and rendering a card that never
+changes on every request would be wasteful.
 
-### Migrations
+## Deploying to Vercel
 
-`drizzle/` is applied by the hosting platform. After editing `db/schema.ts`,
-run `npm run db:generate` and commit both the generated SQL and the updated
-`drizzle/meta/` snapshot.
-
-## Prerequisites
-
-- Node.js `>=22.13.0`
-- The build and install helper scripts target Linux (`flock`, `curl`, GNU
-  `timeout`) and are not native macOS scripts.
-
-## Platform notes
-
-- `.openai/hosting.json` declares the D1 binding (`DB`) and optional R2.
-- `vite.config.ts` simulates declared bindings for local development.
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in
-  helpers. Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and
-  `/callback` — do not implement app routes for those paths.
-- The `codex-preview` meta tag in `app/layout.tsx` is required by the Sites
-  preview tooling and asserted by `tests/rendered-html.test.mjs`. Leave it in
-  place.
-- `examples/d1/` is a reference surface from the starter, not wired into the
-  site.
+1. Push this branch to GitHub and import the repo in Vercel.
+2. Add every variable from the table above (including both database URLs).
+3. Deploy. Then set `NEXT_PUBLIC_SITE_URL` to the real deployment URL and
+   redeploy, so canonical tags and OG images resolve correctly.
+4. Run `npm run db:migrate` once against the Supabase project.
