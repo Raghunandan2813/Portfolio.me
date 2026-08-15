@@ -11,7 +11,14 @@ export type Project = {
   stack: string[];
   liveUrl: string;
   githubUrl: string;
+  /** Path under /public, e.g. "/videos/mindly-demo.mp4". null hides the player. */
   demoVideo: string | null;
+  /**
+   * Still frame shown before playback. Without it the player is a black
+   * rectangle until the first frame decodes, so always ship one alongside
+   * the video.
+   */
+  demoPoster?: string | null;
   accent: "violet" | "blue" | "orange";
 };
 
@@ -37,7 +44,8 @@ export const projects: Project[] = [
     stack: ["Next.js 15", "React 19", "Groq", "pgvector", "Supabase", "Redis", "OAuth 2.0"],
     liveUrl: "https://mindly-ai-agent.vercel.app/",
     githubUrl: "https://github.com/Raghunandan2813/Mindly-Ai-Agent",
-    demoVideo: null,
+    demoVideo: "/videos/mindly-ai-demo.mp4",
+    demoPoster: null,
     accent: "violet",
   },
   {
