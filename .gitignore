@@ -39,3 +39,7 @@ yarn-error.log*
 next-env.d.ts
 tsconfig.tsbuildinfo
 /dist/
+
+# Stray compiler output
+a.out
+*.exe
