@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { BirdFlight } from "./components/BirdFlight";
 import { ResumeChat } from "./components/ResumeChat";
 import { SiteNav } from "./components/SiteNav";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -98,9 +99,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
+          {/* Sunlight carried from the banner down to the footer in light mode. */}
+          <div className="sun-shine" aria-hidden="true" />
           <SiteNav />
           {children}
           <ResumeChat />
+          <BirdFlight />
         </ThemeProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       </body>

@@ -58,7 +58,16 @@
   --on-primary: #ffffff;
   --on-accent: #ffffff;
 
-  /* Banner gradient stops */
+  /* Banner sky: dawn, cool at the zenith warming toward the horizon */
+  --sky-1: #2f6ea8;
+  --sky-2: #74b3d8;
+  --sky-3: #ffd39b;
+  --sky-4: #ff9f5a;
+  /* Ranges are backlit by the sunrise, so they read as silhouettes */
+  --ridge-far: #6b7fa8;
+  --ridge-near: #2f3f63;
+
+  /* Gradient stops still used by the projects/case-study heroes */
   --grad-1: #312e81;
   --grad-2: #6d28d9;
   --grad-3: #0f766e;
@@ -118,6 +127,14 @@
   --on-primary: #0a0f1c;
   --on-accent: #0a0f1c;
 
+  /* Night sky: near-black overhead, faint atmospheric glow at the horizon */
+  --sky-1: #020617;
+  --sky-2: #0a1027;
+  --sky-3: #141c44;
+  --sky-4: #24305e;
+  --ridge-far: #0d1428;
+  --ridge-near: #04070f;
+
   --grad-1: #1e1b4b;
   --grad-2: #4c1d95;
   --grad-3: #0b3b35;
@@ -142,6 +159,8 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 86px; }
 body {
+  /* Positioning context for the document-spanning .sun-shine overlay. */
+  position: relative;
   margin: 0;
   background: var(--bg);
   color: var(--ink);
@@ -193,28 +212,159 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .social-app { padding-top: 22px; }
 .profile-card { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); }
 
+/* ---------------------------------------------------------------------------
+   BANNER LANDSCAPE
+
+   Sunrise over mountains in light mode, a starfield at night in dark mode.
+   Both scenes live in the DOM at once and cross-fade on `[data-theme]`, so
+   the switch is a compositor-only opacity change with no JS involved.
+   ------------------------------------------------------------------------ */
+
 .profile-banner {
   position: relative; height: 235px; overflow: hidden; color: var(--banner-ink);
-  background: linear-gradient(120deg, var(--grad-1), var(--grad-2), var(--grad-3), var(--grad-4), var(--grad-1));
-  background-size: 320% 320%;
-  animation: bannerFlow 22s ease-in-out infinite;
+  background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--sky-3) 72%, var(--sky-4) 100%);
+  transition: background .6s ease;
 }
-@keyframes bannerFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+
+.banner-scene { position: absolute; inset: 0; }
+.scene { position: absolute; inset: 0; transition: opacity .7s ease; }
+.scene-day { opacity: 1; }
+.scene-night { opacity: 0; }
+[data-theme="dark"] .scene-day { opacity: 0; }
+[data-theme="dark"] .scene-night { opacity: 1; }
+
+/* Keeps the white banner text legible over a bright dawn sky. */
+.profile-banner::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(105deg, rgba(6,12,26,.62) 0%, rgba(6,12,26,.34) 38%, transparent 70%);
 }
-/* Slow-drifting aurora blooms layered over the flowing gradient. */
-.profile-banner::before { content: ""; position: absolute; inset: -30%; background: radial-gradient(circle at 30% 40%, color-mix(in srgb, var(--teal) 45%, transparent), transparent 45%), radial-gradient(circle at 75% 65%, color-mix(in srgb, var(--rose) 38%, transparent), transparent 45%); animation: auroraDrift 26s ease-in-out infinite alternate; }
-@keyframes auroraDrift {
-  0% { transform: translate3d(-4%, -3%, 0) scale(1); }
-  100% { transform: translate3d(5%, 4%, 0) scale(1.12); }
+
+/* --- Night ------------------------------------------------------------- */
+
+.stars { position: absolute; inset: 0; }
+.star {
+  position: absolute; display: block; border-radius: 50%; background: #fff;
+  animation-name: twinkle; animation-iteration-count: infinite; animation-timing-function: ease-in-out;
 }
-.banner-grid { position: absolute; inset: 0; opacity: .16; background-image: linear-gradient(rgba(255,255,255,.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.28) 1px, transparent 1px); background-size: 44px 44px; mask-image: linear-gradient(90deg, black, transparent 78%); }
-.banner-code { position: absolute; z-index: 2; top: 26px; left: 30px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; color: rgba(255,255,255,.85); font-family: ui-monospace, monospace; font-size: 9px; letter-spacing: .13em; }
-.banner-copy { position: absolute; z-index: 2; left: 31px; bottom: 28px; display: flex; align-items: center; gap: 13px; }
+.star-bright { box-shadow: 0 0 6px 1px rgba(191, 219, 254, .9); }
+@keyframes twinkle {
+  0%, 100% { opacity: .18; transform: scale(.7); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.shooting-star {
+  position: absolute; width: 90px; height: 1.5px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  opacity: 0; animation-name: shoot; animation-iteration-count: infinite; animation-timing-function: ease-out;
+}
+@keyframes shoot {
+  0% { opacity: 0; transform: translate3d(0,0,0) rotate(18deg) scaleX(.2); }
+  4% { opacity: 1; }
+  14% { opacity: 0; transform: translate3d(260px, 90px, 0) rotate(18deg) scaleX(1); }
+  100% { opacity: 0; transform: translate3d(260px, 90px, 0) rotate(18deg) scaleX(1); }
+}
+
+.moon { position: absolute; top: 26px; right: 12%; width: 54px; height: 54px; }
+.moon-body {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fdfbf3, #dfe6f2 62%, #b9c6dc);
+  box-shadow: inset -7px -4px 0 -2px rgba(120,140,175,.35);
+}
+.moon-glow {
+  position: absolute; inset: -70%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(226,236,255,.42), transparent 62%);
+  animation: moonPulse 7s ease-in-out infinite;
+}
+@keyframes moonPulse { 0%,100% { opacity: .65; transform: scale(1); } 50% { opacity: 1; transform: scale(1.09); } }
+
+/* --- Day --------------------------------------------------------------- */
+
+/* Rises from behind the ridgeline on load and settles just above it. */
+.sun { position: absolute; left: 50%; bottom: 34%; width: 92px; height: 92px; margin-left: -46px; animation: sunRise 3.4s cubic-bezier(.22,.72,.3,1) both; }
+@keyframes sunRise {
+  0% { transform: translateY(120px) scale(.82); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.sun-body {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, #fffdf3, #ffe08a 44%, #ffb347 78%, #ff9331);
+  box-shadow: 0 0 34px 10px rgba(255,183,77,.62);
+}
+.sun-glow {
+  position: absolute; inset: -140%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,196,105,.55), rgba(255,178,90,.16) 42%, transparent 68%);
+  animation: sunPulse 6s ease-in-out infinite;
+}
+@keyframes sunPulse { 0%,100% { opacity: .8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
+.sun-rays {
+  position: absolute; inset: -190%;
+  background: repeating-conic-gradient(from 0deg, rgba(255,214,140,.34) 0deg 5deg, transparent 5deg 20deg);
+  mask-image: radial-gradient(circle, black 12%, transparent 62%);
+  animation: raySpin 46s linear infinite;
+}
+@keyframes raySpin { to { transform: rotate(360deg); } }
+
+.cloud { position: absolute; height: 16px; border-radius: 999px; background: rgba(255,255,255,.82); filter: blur(.4px); box-shadow: 0 0 22px rgba(255,255,255,.6); }
+.cloud::before, .cloud::after { content: ""; position: absolute; border-radius: 50%; background: inherit; }
+.cloud::before { width: 26px; height: 26px; top: -11px; left: 16%; }
+.cloud::after { width: 18px; height: 18px; top: -7px; right: 22%; }
+.cloud-1 { top: 22%; width: 96px; animation: drift 42s linear infinite; }
+.cloud-2 { top: 40%; width: 68px; opacity: .7; animation: drift 58s linear infinite; animation-delay: -18s; }
+.cloud-3 { top: 13%; width: 52px; opacity: .55; animation: drift 70s linear infinite; animation-delay: -40s; }
+@keyframes drift { from { transform: translateX(-140px); } to { transform: translateX(1300px); } }
+
+/* --- Shared ridgeline --------------------------------------------------- */
+
+.ridges { position: absolute; inset: auto 0 0 0; width: 100%; height: 62%; display: block; }
+.ridge { transition: fill .6s ease; }
+.ridge-far { fill: var(--ridge-far); }
+.ridge-near { fill: var(--ridge-near); }
+
+.banner-grid { position: absolute; inset: 0; z-index: 1; opacity: .07; background-image: linear-gradient(rgba(255,255,255,.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.28) 1px, transparent 1px); background-size: 44px 44px; mask-image: linear-gradient(90deg, black, transparent 78%); }
+.banner-code { position: absolute; z-index: 3; top: 26px; left: 30px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; color: rgba(255,255,255,.9); font-family: ui-monospace, monospace; font-size: 9px; letter-spacing: .13em; backdrop-filter: blur(3px); }
+.banner-copy { position: absolute; z-index: 3; left: 31px; bottom: 28px; display: flex; align-items: center; gap: 13px; text-shadow: 0 2px 14px rgba(4,10,22,.55); }
 .banner-copy small { font-size: clamp(20px, 4vw, 44px); font-weight: 900; letter-spacing: -.06em; }
-.banner-copy strong { color: color-mix(in srgb, var(--violet) 70%, white); font-size: 30px; }
+.banner-copy strong { color: #ffd9a0; font-size: 30px; }
+
+/* ---------------------------------------------------------------------------
+   SUNLIGHT WASH
+
+   Spans the whole document so the sun's light carries from the banner all the
+   way down to the footer. `soft-light` tints without flattening contrast, and
+   it sits below the nav and chat launcher so those stay untinted.
+   ------------------------------------------------------------------------ */
+
+.sun-shine {
+  /* `inset` stretches to the full body box; a percentage height would depend
+     on body having a resolved height, which it does not. */
+  position: absolute; inset: 0;
+  z-index: 60; pointer-events: none; opacity: 0; mix-blend-mode: soft-light;
+  transition: opacity 1s ease;
+  background:
+    radial-gradient(ellipse 130% 42% at 50% -6%, rgba(255,206,128,.95), rgba(255,190,110,.35) 34%, transparent 68%),
+    linear-gradient(180deg, rgba(255,198,120,.5) 0%, rgba(255,208,140,.2) 32%, rgba(255,214,155,.09) 66%, rgba(255,201,128,.24) 100%);
+}
+[data-theme="light"] .sun-shine { opacity: 1; }
+
+/* ---------------------------------------------------------------------------
+   BIRDS
+
+   Composed from nested transforms: the track crosses the viewport, the orbit
+   carries the bird around a circle while cancelling its own rotation so the
+   bird stays upright, and the bird flaps.
+   ------------------------------------------------------------------------ */
+
+.bird-flight { position: fixed; inset: 0; z-index: 70; overflow: hidden; pointer-events: none; }
+.bird-track { position: absolute; left: -14vw; animation-name: birdCross; animation-timing-function: linear; animation-fill-mode: both; }
+@keyframes birdCross { from { transform: translateX(0); } to { transform: translateX(128vw); } }
+.bird-orbit { animation-name: birdOrbit; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes birdOrbit {
+  from { transform: rotate(0deg) translateY(var(--orbit)) rotate(0deg); }
+  to { transform: rotate(360deg) translateY(var(--orbit)) rotate(-360deg); }
+}
+.bird { color: #33425c; opacity: .82; }
+.bird svg { display: block; width: 26px; height: 13px; animation: flap .34s ease-in-out infinite; }
+@keyframes flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.34); } }
 
 .profile-body { position: relative; padding: 0 32px 28px; }
 

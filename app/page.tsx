@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BannerScene } from "./components/BannerScene";
 import { ContactForm } from "./components/ContactForm";
 import { GithubActivity } from "./components/GithubActivity";
 import { GithubProjects } from "./components/GithubProjects";
@@ -54,6 +55,7 @@ export default function Home() {
     <main className="social-app" id="top">
       <Reveal as="section" className="profile-card page-shell" from="scale" amount={0.05}>
         <div className="profile-banner">
+          <BannerScene />
           <div className="banner-grid" />
           <span className="banner-code">BUILD / LEARN / SHIP</span>
           <div className="banner-copy"><small>FULL STACK</small><strong>×</strong><small>AGENTIC AI</small></div>
