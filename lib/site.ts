@@ -5,15 +5,31 @@
  * absolute Open Graph URL, so it must match the deployed origin exactly —
  * no trailing slash. Override it per environment with `NEXT_PUBLIC_SITE_URL`.
  */
-const FALLBACK_SITE_URL = "https://raghunandan-kumar-portfolio.vercel.app";
+const FALLBACK_SITE_URL = "http://localhost:3000";
 
 function normalise(url: string) {
   return url.replace(/\/+$/, "");
 }
 
-export const SITE_URL = normalise(
-  process.env.NEXT_PUBLIC_SITE_URL || FALLBACK_SITE_URL,
-);
+function resolveSiteUrl() {
+  // An explicit value always wins.
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+
+  // Vercel sets this to the project's stable production domain (unlike
+  // VERCEL_URL, which changes on every deployment and would churn canonical
+  // tags). It means the first deploy is already correct before you have had a
+  // chance to set NEXT_PUBLIC_SITE_URL by hand.
+  const vercelDomain = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelDomain) return `https://${vercelDomain}`;
+
+  return FALLBACK_SITE_URL;
+}
+
+/**
+ * Only ever read in server contexts (metadata, sitemap, robots, JSON-LD), so
+ * the non-public env vars above are safe to rely on here.
+ */
+export const SITE_URL = normalise(resolveSiteUrl());
 
 export const SITE_NAME = "Raghunandan Kumar";
 export const SITE_TITLE = "Raghunandan Kumar | Full Stack & Agentic AI Engineer";
