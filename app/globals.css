@@ -75,6 +75,10 @@
   --banner-ink: #ffffff;
 
   /* Contribution heatmap */
+  /* Cursor cat */
+  --cat-ink: #2c3a55;
+  --cat-eye: #ffd76b;
+
   --hm-0: #e4eaf4;
   --hm-1: #9be9a8;
   --hm-2: #40c463;
@@ -140,6 +144,9 @@
   --grad-3: #0b3b35;
   --grad-4: #12275c;
   --banner-ink: #f4f8ff;
+
+  --cat-ink: #cfd9ea;
+  --cat-eye: #ffcf5a;
 
   --hm-0: #1c2740;
   --hm-1: #0e4429;
@@ -365,6 +372,61 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .bird { color: #33425c; opacity: .82; }
 .bird svg { display: block; width: 26px; height: 13px; animation: flap .34s ease-in-out infinite; }
 @keyframes flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.34); } }
+
+/* ---------------------------------------------------------------------------
+   CURSOR CAT
+
+   Position is driven by JS; everything expressive — gait, tail, ears, blink —
+   is CSS keyed off a state class, so the rAF loop only ever writes a transform.
+   ------------------------------------------------------------------------ */
+
+.cursor-cat {
+  position: fixed; top: 0; left: 0; z-index: 90;
+  width: 56px; height: 44px; pointer-events: none;
+  will-change: transform;
+}
+.cat-body { width: 100%; height: 100%; color: var(--cat-ink); }
+.cat-body svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cat-torso, .cat-head circle, .cat-head path, .cat-leg rect { fill: currentColor; }
+.cat-eye { fill: var(--cat-eye); animation: catBlink 5.2s infinite; }
+@keyframes catBlink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+.cat-eye { transform-box: fill-box; transform-origin: center; }
+.cat-whiskers { opacity: .55; }
+
+/* Legs pivot from the hip rather than the foot. */
+.cat-leg { transform-box: fill-box; transform-origin: 50% 8%; }
+
+/* --- Idle: breathing, slow tail, occasional ear twitch ------------------ */
+.is-idle .cat-torso { animation: catBreathe 2.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes catBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.045); } }
+.is-idle .cat-tail { animation: tailSway 3.1s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 60%; }
+@keyframes tailSway { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(13deg); } }
+.is-idle .cat-head { animation: headBob 4.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 30% 80%; }
+@keyframes headBob { 0%, 100% { transform: rotate(0deg); } 45% { transform: rotate(-5deg); } 70% { transform: rotate(3deg); } }
+
+/* --- Walking: diagonal gait, the pairs offset by half a cycle ----------- */
+.is-walking .cat-leg { animation: legSwing .42s ease-in-out infinite; }
+.is-walking .cat-leg-bl, .is-walking .cat-leg-fr { animation-delay: -.21s; }
+@keyframes legSwing { 0%, 100% { transform: rotate(22deg); } 50% { transform: rotate(-22deg); } }
+.is-walking .cat-torso { animation: catBob .42s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes catBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.1px); } }
+.is-walking .cat-tail { animation: tailSway 1.05s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 60%; }
+
+/* --- Running: faster gait, wider stride, tail streams out --------------- */
+.is-running .cat-leg { animation: legSwingFast .2s ease-in-out infinite; }
+.is-running .cat-leg-bl, .is-running .cat-leg-fr { animation-delay: -.1s; }
+@keyframes legSwingFast { 0%, 100% { transform: rotate(38deg); } 50% { transform: rotate(-38deg); } }
+.is-running .cat-torso { animation: catBob .2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.is-running .cat-tail { animation: tailStream .34s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 60%; }
+@keyframes tailStream { 0%, 100% { transform: rotate(-24deg); } 50% { transform: rotate(-12deg); } }
+
+/* --- Sitting: haunches down, front legs straight, tail curls ------------ */
+.is-sitting .cat-leg-bl, .is-sitting .cat-leg-br { transform: translateY(4px) scaleY(.55); }
+.is-sitting .cat-torso { transform: translateY(3px) rotate(-6deg); transform-box: fill-box; transform-origin: 30% 100%; }
+.is-sitting .cat-head { transform: translateY(2px); }
+.is-sitting .cat-tail { animation: tailCurl 4.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 60%; }
+@keyframes tailCurl { 0%, 100% { transform: rotate(16deg) translateY(3px); } 50% { transform: rotate(30deg) translateY(3px); } }
+.cat-leg, .cat-torso, .cat-head { transition: transform .35s ease; }
 
 .profile-body { position: relative; padding: 0 32px 28px; }
 

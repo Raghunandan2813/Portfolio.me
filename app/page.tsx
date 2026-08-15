@@ -57,8 +57,8 @@ export default function Home() {
         <div className="profile-banner">
           <BannerScene />
           <div className="banner-grid" />
-          <span className="banner-code">BUILD / LEARN / SHIP</span>
-          <div className="banner-copy"><small>FULL STACK</small><strong>×</strong><small>AGENTIC AI</small></div>
+          <span className="banner-code"></span>
+          <div className="banner-copy"><small></small><strong></strong><small></small></div>
         </div>
         <div className="profile-body">
           <div className="avatar-ring" aria-label="Profile photo">
@@ -83,12 +83,8 @@ export default function Home() {
             <p className="handle">@raghunandan.dev</p>
           </div>
           <p className="profile-headline">Full Stack &amp; Agentic AI Engineer · Building production-grade LLM pipelines, RAG systems, multi-agent workflows, and real-time products.</p>
-          <p className="profile-meta">Kushinagar, India · Remote <span>·</span> <a href={`mailto:${CONTACT_EMAIL}`}>Contact info</a></p>
-          <div className="profile-links">
-            <a href={GITHUB_PROFILE_URL} target="_blank" rel="noreferrer"><b>GH</b> github.com/Raghunandan2813</a>
-            <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"><b>in</b> LinkedIn</a>
-            <span><i /> Open to meaningful AI &amp; full-stack roles</span>
-          </div>
+          <p className="profile-meta"> India  <span>·</span> <a href={`mailto:${CONTACT_EMAIL}`}>Contact info</a></p>
+          
           <div className="profile-stats">
             <div><strong>2+</strong><span>years experience</span></div>
             <div><strong>3</strong><span>flagship products</span></div>

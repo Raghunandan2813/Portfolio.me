@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { BirdFlight } from "./components/BirdFlight";
+import { CursorCat } from "./components/CursorCat";
 import { ResumeChat } from "./components/ResumeChat";
 import { SiteNav } from "./components/SiteNav";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -105,6 +106,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           {children}
           <ResumeChat />
           <BirdFlight />
+          <CursorCat />
         </ThemeProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
       </body>

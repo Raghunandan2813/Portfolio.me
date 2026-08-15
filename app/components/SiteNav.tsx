@@ -6,11 +6,11 @@ export function SiteNav() {
     <header className="social-nav">
       <div className="nav-inner">
         <Link className="nav-brand" href="/#top" aria-label="Raghunandan Kumar home">
-          <span>RK</span>
+          <span></span>
         </Link>
         <Link className="nav-search" href="/#work" aria-label="Jump to my work">
           <i aria-hidden="true">⌕</i>
-          <span>Browse my work</span>
+          <span></span>
         </Link>
         <nav className="nav-links" aria-label="Primary navigation">
           <Link href="/#top"><b>⌂</b><span>Profile</span></Link>
