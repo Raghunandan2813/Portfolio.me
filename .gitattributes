@@ -1,0 +1,17 @@
+# Normalise text files to LF in the repository.
+* text=auto eol=lf
+
+# The Sites builder runs these with `bash` on Linux. CRLF endings make the
+# shebang line unparseable ("bad interpreter"), so pin them to LF explicitly.
+*.sh text eol=lf
+
+# Binary assets must never be line-ending converted.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.mp4 binary
