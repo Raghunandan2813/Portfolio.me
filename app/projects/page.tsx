@@ -2,10 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ProjectMedia } from "../components/ProjectMedia";
 import { projects } from "../data/portfolio";
+import { CONTACT_EMAIL } from "@/lib/site";
 
+const description =
+  "Case studies for Raghunandan Kumar's agentic AI and full-stack products.";
+
+// The root layout's title template appends "| Raghunandan Kumar".
 export const metadata: Metadata = {
-  title: "Projects | Raghunandan Kumar",
-  description: "Case studies for Raghunandan Kumar's agentic AI and full-stack products.",
+  title: "Projects",
+  description,
+  alternates: { canonical: "/projects" },
+  openGraph: {
+    title: "Projects | Raghunandan Kumar",
+    description,
+    url: "/projects",
+    type: "website",
+  },
 };
 
 export default function ProjectsPage() {
@@ -32,7 +44,7 @@ export default function ProjectsPage() {
           </article>
         ))}
       </section>
-      <section className="projects-cta"><span>Have a relevant engineering problem?</span><h2>Let&apos;s compare notes.</h2><a href="mailto:raghu9555k@gmail.com">raghu9555k@gmail.com ↗</a></section>
+      <section className="projects-cta"><span>Have a relevant engineering problem?</span><h2>Let&apos;s compare notes.</h2><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL} ↗</a></section>
     </main>
   );
 }

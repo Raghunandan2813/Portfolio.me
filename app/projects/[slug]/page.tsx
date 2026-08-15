@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProjectMedia } from "../../components/ProjectMedia";
 import { projects } from "../../data/portfolio";
+import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 
 type ProjectPageProps = { params: Promise<{ slug: string }> };
 
@@ -14,7 +15,20 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   const { slug } = await params;
   const project = projects.find((item) => item.slug === slug);
   if (!project) return {};
-  return { title: `${project.title} | Raghunandan Kumar`, description: project.summary };
+
+  const url = `/projects/${project.slug}`;
+  return {
+    // The root layout's title template appends "| Raghunandan Kumar".
+    title: project.title,
+    description: project.summary,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${project.title} | Raghunandan Kumar`,
+      description: project.summary,
+      url,
+      type: "article",
+    },
+  };
 }
 
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
@@ -24,8 +38,24 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const currentIndex = projects.findIndex((item) => item.slug === slug);
   const nextProject = projects[(currentIndex + 1) % projects.length];
 
+  const projectSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: project.title,
+    description: project.summary,
+    applicationCategory: project.category,
+    url: absoluteUrl(`/projects/${project.slug}`),
+    sameAs: [project.liveUrl, project.githubUrl],
+    author: { "@type": "Person", name: SITE_NAME, url: SITE_URL },
+    keywords: project.stack.join(", "),
+  };
+
   return (
     <main className={`case-page ${project.accent}`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(projectSchema) }}
+      />
       <div className="page-shell">
         <Link className="case-back" href="/projects">← All projects</Link>
         <section className="case-hero">

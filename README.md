@@ -1,108 +1,110 @@
-# vinext-starter
+# Raghunandan Kumar — Portfolio
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+Personal portfolio and case-study site for a Full Stack & Agentic AI Engineer.
+Built on [vinext](https://github.com/cloudflare/vinext) (Next.js App Router on
+Cloudflare Workers) with Cloudflare D1 + Drizzle for persistence.
+
+**Live:** set `NEXT_PUBLIC_SITE_URL` — see [Configuration](#configuration).
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router, RSC) via vinext |
+| Runtime | Cloudflare Workers |
+| Database | Cloudflare D1 (SQLite) + Drizzle ORM |
+| Styling | Hand-written CSS with design tokens, Tailwind v4 available |
+| Email | Resend |
+
+## Routes
+
+| Path | Description |
+| --- | --- |
+| `/` | Profile, about, featured work, GitHub feeds, experience, stack, contact |
+| `/projects` | Case-study archive |
+| `/projects/[slug]` | Individual case study (statically generated) |
+| `/api/contact` | `POST` — validates, emails, and stores an enquiry |
+| `/api/visits` | `GET` total, `POST` counts one unique visit per browser per day |
+| `/api/github` | Latest public repositories, cached |
+| `/api/github-activity` | 12-week public contribution calendar, cached |
+| `/sitemap.xml`, `/robots.txt` | Generated from `app/sitemap.ts` and `app/robots.ts` |
+
+## Configuration
+
+Copy `.env.example` to `.env` for local work, and set the same keys as secrets
+in the hosting dashboard for production.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | **Yes** | Canonical origin. Drives canonical tags, sitemap, and absolute OG image URLs. |
+| `GITHUB_TOKEN` | Strongly recommended | Raises the GitHub API limit from 60/hr per shared IP to 5,000/hr. Without it both GitHub feeds degrade to cached or empty data. A fine-grained token with **no scopes** is sufficient. |
+| `RESEND_API_KEY` | Recommended | Enables contact-form email notifications. Without it messages are still stored in D1. |
+| `CONTACT_EMAIL` | With Resend | Notification destination. |
+| `CONTACT_FROM` | No | Verified sender address. Defaults to the Resend shared sender. |
+
+## Reliability notes
+
+Three deliberate design decisions worth knowing before changing this code:
+
+1. **The contact route delivers and persists independently.** `deliverEmail()`
+   and `storeEnquiry()` both swallow their own errors and run under
+   `Promise.all`, so a D1 outage cannot prevent the email and a Resend outage
+   cannot prevent the stored copy. Only a both-failed case returns an error to
+   the visitor. Do not reintroduce a sequence where one can throw before the
+   other runs.
+
+2. **GitHub responses go through a D1 read-through cache with stale-on-error.**
+   See `lib/cache.ts`. When the API fails, an expired cache entry is served in
+   preference to an empty feed. `/api/github-activity` caches the raw event
+   counts, not the rendered calendar, so a cached response still ends on
+   today's date.
+
+3. **Rate limiting fails open.** `lib/rate-limit.ts` allows the request through
+   if D1 is unreachable. Losing a real enquiry is worse than admitting spam,
+   and every route validates independently.
+
+## Development
+
+```bash
+npm run install:ci    # one bounded lockfile install
+npm run dev           # Vite + vinext dev server
+npm run build         # build and validate the deployable Sites artifact
+npm test              # build, validate, verify rendered preview metadata
+npm run lint          # eslint
+```
+
+Database and assets:
+
+```bash
+npm run db:generate   # regenerate Drizzle migrations after editing db/schema.ts
+npm run og:generate   # re-render public/og.png (Node-side; run after copy edits)
+```
+
+`og:generate` runs in Node rather than in the Worker on purpose: `next/og`
+pulls in satori and resvg WASM, which would consume a large share of the Worker
+size budget if it ran at request time.
+
+### Migrations
+
+`drizzle/` is applied by the hosting platform. After editing `db/schema.ts`,
+run `npm run db:generate` and commit both the generated SQL and the updated
+`drizzle/meta/` snapshot.
 
 ## Prerequisites
 
 - Node.js `>=22.13.0`
-- Linux with `flock`, `curl`, and GNU `timeout`
+- The build and install helper scripts target Linux (`flock`, `curl`, GNU
+  `timeout`) and are not native macOS scripts.
 
-## Sites Lifecycle
+## Platform notes
 
-The Sites lifecycle CLI runs the locked dependency install before returning this checkout. Edit the source under `app/`, then checkpoint when a coherent milestone is ready to inspect or share. The remote Sites builder runs `npm run build` against the pushed commit. Do not repeat install or build as a normal pre-checkpoint step.
-
-This starter does not use `wrangler.jsonc`.
-
-`install:ci` is intentionally a single, non-retrying `npm ci`. It refuses a concurrent install for the same project, consumes a matching image-seeded npm cache with `--prefer-offline` while retaining registry fallback for a missing cache object, otherwise downloads and verifies the complete vinext tarball recorded in `package-lock.json`, limits npm to one socket, and terminates a stalled install. `build` applies a short timeout and then validates the Sites artifact. These helpers target Linux and use GNU `timeout`; they are not native macOS scripts.
-
-Scripts that need writable project-scoped home, npm, XDG, and temporary paths use `scripts/sites-env.sh`. The `dev` and `start` scripts honor the caller's runtime environment and keep Wrangler logs inside the checkout. The generated `.sites-runtime/` directory is disposable and ignored by Git.
-
-## Included Shape
-
-- edit site code under `app/`
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Diagnostic Commands
-
-- `npm run install:ci`: perform the one bounded lockfile install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build and validate the deployable Sites artifact
-- `npm run start`: start the built Vinext application
-- `npm test`: build, validate, and verify the rendered development-preview metadata
-- `npm run validate:artifact`: recheck an existing artifact's manifest and ESM `default.fetch` export
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-Use build and validation commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
-
-The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- `.openai/hosting.json` declares the D1 binding (`DB`) and optional R2.
+- `vite.config.ts` simulates declared bindings for local development.
+- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in
+  helpers. Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and
+  `/callback` — do not implement app routes for those paths.
+- The `codex-preview` meta tag in `app/layout.tsx` is required by the Sites
+  preview tooling and asserted by `tests/rendered-html.test.mjs`. Leave it in
+  place.
+- `examples/d1/` is a reference surface from the starter, not wired into the
+  site.
