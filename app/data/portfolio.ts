@@ -19,6 +19,8 @@ export type Project = {
    * the video.
    */
   demoPoster?: string | null;
+  /** Human-readable runtime, shown on the video cover. */
+  demoLength?: string;
   accent: "violet" | "blue" | "orange";
 };
 
@@ -46,6 +48,7 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/Raghunandan2813/Mindly-Ai-Agent",
     demoVideo: "/videos/mindly-ai-demo.mp4",
     demoPoster: null,
+    demoLength: "5:50",
     accent: "violet",
   },
   {
@@ -71,6 +74,7 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/raghunandan2813/ai-interview-coach",
     demoVideo: "/videos/ai-interview-coach-demo.mp4",
     demoPoster: null,
+    demoLength: "7:35",
     accent: "blue",
   },
   {
