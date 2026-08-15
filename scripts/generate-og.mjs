@@ -147,13 +147,22 @@ function Card() {
 }
 
 async function main() {
+  // This Next build's package.json `exports` map has no "./og" entry, so the
+  // bare specifier fails under plain Node resolution even though the module is
+  // present. Fall back to the concrete file path.
   let ImageResponse;
-  try {
-    ({ ImageResponse } = await import("next/og"));
-  } catch (error) {
+  for (const specifier of ["next/og", "next/og.js"]) {
+    try {
+      ({ ImageResponse } = await import(specifier));
+      if (ImageResponse) break;
+    } catch {
+      // Try the next specifier.
+    }
+  }
+
+  if (!ImageResponse) {
     console.error(
-      "Could not load `next/og`. Run `npm run install:ci` first.\n",
-      error,
+      "Could not load ImageResponse from next/og or next/og.js. Run `npm ci` first.",
     );
     process.exit(1);
   }
