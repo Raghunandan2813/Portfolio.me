@@ -765,13 +765,7 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
    ========================================================================= */
 
 .projects-page { padding-top: 48px; }
-.projects-hero { min-height: 510px; padding: 65px 58px; overflow: hidden; position: relative; border-radius: 24px; color: var(--banner-ink); background: linear-gradient(120deg, var(--grad-1), var(--grad-2), var(--grad-3), var(--grad-4), var(--grad-1)); background-size: 320% 320%; animation: bannerFlow 24s ease-in-out infinite; }
-.projects-hero::after { content: ""; position: absolute; right: -120px; top: 20px; width: 460px; height: 460px; border: 1px solid var(--banner-hairline); border-radius: 50%; opacity: .5; }
 .projects-hero .eyebrow { color: var(--banner-accent); }
-.projects-hero h1 { position: relative; z-index: 1; max-width: 850px; margin: 15px 0 22px; font-size: clamp(56px, 8vw, 96px); line-height: .9; letter-spacing: -.07em; }
-.projects-hero h1 em { color: transparent; font-style: normal; -webkit-text-stroke: 1px var(--banner-accent); }
-.projects-hero > p { position: relative; z-index: 1; max-width: 630px; color: var(--banner-muted); font-size: 15px; line-height: 1.7; }
-.projects-hero > div { position: relative; z-index: 1; display: flex; gap: 10px; margin-top: 30px; }
 .projects-hero .primary-action { background: var(--surface); color: var(--ink); }
 .projects-hero .primary-action:hover { background: var(--surface-2); }
 .projects-hero .outline-action { border-color: var(--banner-hairline); color: var(--banner-ink); }
@@ -860,6 +854,103 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .video-shell.compact .video-play svg { width: 20px; height: 20px; }
 .video-shell.compact .video-caption b { font-size: 14px; }
 
+
+/* ---------------------------------------------------------------------------
+   PROJECTS HERO
+
+   Two columns: copy on the left, a fanned deck of project cards on the right.
+   The deck exists because a single-column hero at this height left the right
+   half empty.
+   ------------------------------------------------------------------------ */
+
+.projects-hero {
+  position: relative; overflow: hidden;
+  padding: 58px 52px 0; border-radius: 24px;
+  color: var(--banner-ink);
+  background: linear-gradient(120deg, var(--grad-1), var(--grad-2), var(--grad-3), var(--grad-4), var(--grad-1));
+  background-size: 320% 320%;
+  animation: bannerFlow 24s ease-in-out infinite;
+}
+/* Faint grid texture so the large colour field is not flat. */
+.projects-hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .12;
+  background-image: linear-gradient(var(--banner-hairline) 1px, transparent 1px), linear-gradient(90deg, var(--banner-hairline) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 70% 80% at 30% 20%, black, transparent 75%);
+}
+
+.hero-inner {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  align-items: center; gap: 40px;
+  padding-bottom: 46px;
+}
+.hero-copy { min-width: 0; }
+
+.projects-hero h1 { margin: 14px 0 20px; font-size: clamp(44px, 5.6vw, 76px); line-height: .96; letter-spacing: -.055em; }
+.hero-word { display: inline-block; }
+.muted-word { color: color-mix(in srgb, var(--banner-ink) 62%, transparent); }
+.projects-hero p { max-width: 560px; margin: 0; color: var(--banner-muted); font-size: 15px; line-height: 1.7; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.projects-hero .primary-action { background: var(--surface); color: var(--ink); }
+.projects-hero .primary-action:hover { background: var(--surface-2); }
+.projects-hero .outline-action { border-color: var(--banner-hairline); color: var(--banner-ink); }
+.projects-hero .outline-action:hover { background: var(--banner-hover); }
+
+.hero-stats { display: flex; flex-wrap: wrap; gap: 34px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--banner-hairline); }
+.hero-stats > div { display: flex; flex-direction: column; gap: 3px; }
+.hero-stats strong { font-size: 26px; letter-spacing: -.04em; }
+.hero-stats span { color: var(--banner-muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+
+/* --- Fanned deck -------------------------------------------------------- */
+
+.hero-deck { position: relative; height: 400px; will-change: transform; }
+.deck-card {
+  position: absolute; width: 264px; padding: 20px;
+  border: 1px solid var(--line); border-radius: 18px;
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 24px 60px rgba(20, 14, 4, .26);
+  cursor: default;
+}
+.deck-1 { left: 0; top: 26px; z-index: 3; }
+.deck-2 { left: 84px; top: 118px; z-index: 2; }
+.deck-3 { left: 24px; top: 216px; z-index: 1; }
+.deck-chip { display: inline-block; padding: 5px 9px; border-radius: 999px; background: var(--primary-wash); color: var(--primary); font-size: 8px; font-weight: 850; text-transform: uppercase; letter-spacing: .1em; }
+.deck-card strong { display: block; margin: 11px 0 6px; font-size: 18px; letter-spacing: -.03em; }
+.deck-card p { max-width: none; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.deck-stack { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 13px; }
+.deck-stack i { padding: 5px 7px; border-radius: 6px; background: var(--surface-2); color: var(--muted); font-style: normal; font-size: 8px; }
+.deck-bar { display: block; height: 3px; margin-top: 15px; border-radius: 999px; background: linear-gradient(90deg, var(--brand-1), var(--brand-3)); }
+.deck-card.blue .deck-bar { background: linear-gradient(90deg, var(--panel), var(--brand-2)); }
+.deck-card.orange .deck-bar { background: linear-gradient(90deg, var(--brand-3), var(--brand-1)); }
+
+/* --- Tech marquee ------------------------------------------------------- */
+
+.hero-marquee {
+  position: relative; z-index: 1; overflow: hidden;
+  padding: 14px 0; margin: 0 -52px;
+  border-top: 1px solid var(--banner-hairline);
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.marquee-track { display: flex; width: max-content; animation: marqueeSlide 32s linear infinite; }
+.marquee-group { display: flex; gap: 38px; padding-right: 38px; }
+.marquee-group span { color: var(--banner-muted); font-size: 12px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+/* Two identical groups scrolling exactly one group-width apart loops seamlessly. */
+@keyframes marqueeSlide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.hero-marquee:hover .marquee-track { animation-play-state: paused; }
+
+@media (max-width: 1040px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 26px; }
+  .hero-deck { height: 330px; max-width: 420px; }
+}
+@media (max-width: 620px) {
+  .projects-hero { padding: 40px 22px 0; }
+  .hero-marquee { margin: 0 -22px; }
+  .hero-deck { height: 300px; transform: scale(.86); transform-origin: top left; }
+  .hero-stats { gap: 20px; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+}
+
 /* ---------------------------------------------------------------------------
    PROJECT BENTO
    ------------------------------------------------------------------------ */
@@ -919,10 +1010,6 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .bento-links a:last-child { color: var(--muted); font-size: 11px; font-weight: 700; }
 .bento-links a:last-child:hover { color: var(--primary); }
 
-.hero-stats { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 34px; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--banner-hairline); }
-.hero-stats > div { display: flex; flex-direction: column; gap: 3px; }
-.hero-stats strong { font-size: 26px; letter-spacing: -.04em; }
-.hero-stats span { color: var(--banner-muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
 
 @media (max-width: 1040px) {
   .span-wide { grid-column: span 12; grid-row: auto; }
