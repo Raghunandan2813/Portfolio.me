@@ -135,6 +135,15 @@
 .admin-auth h1 { margin: 6px 0 10px; font-size: 26px; letter-spacing: -.03em; }
 .admin-auth .admin-form { margin-top: 16px; }
 
+/* Magic link, folded away: it is the fallback, not the default. */
+.admin-alt { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.admin-alt > summary {
+  cursor: pointer; color: var(--muted);
+  font-size: 11px; font-weight: 800;
+}
+.admin-alt > summary:hover { color: var(--primary); }
+.admin-alt .admin-note { margin-top: 10px; }
+
 @media (max-width: 620px) {
   .admin-head { display: block; }
   .admin-head-actions { margin-top: 14px; }
