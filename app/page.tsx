@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BannerScene } from "./components/BannerScene";
 import { ContactForm } from "./components/ContactForm";
+import { ExperienceDetails, type ExperienceDetail } from "./components/ExperienceDetails";
 import { GithubActivity } from "./components/GithubActivity";
 import { GithubProjects } from "./components/GithubProjects";
 import {
@@ -32,6 +33,10 @@ type Experience = {
   location: string;
   current?: boolean;
   description: string;
+  /** Expanded write-up, folded behind a "Read more" toggle. */
+  details?: ExperienceDetail[];
+  /** Rendered at the foot of the expanded write-up. */
+  stack?: string;
   skills: string[];
 };
 
@@ -46,6 +51,29 @@ const experiences: Experience[] = [
     location: "Remote",
     current: true,
     description: "Current work focused on AI quality and model evaluation for production-grade artificial intelligence systems.",
+    details: [
+      {
+        title: "Repaired and shipped agentic SWE benchmark tasks",
+        body: "Rebuilt 7+ returned tasks from real merged open-source PRs across Python, TypeScript and Rust repos, taking each through a multi-stage automated review gate to acceptance.",
+      },
+      {
+        title: "Built a Docker validation harness",
+        body: "Runs oracle, base, forgery and idempotence scenarios directly from the packed submission zip, reproducing the grading platform's real environment. Caught defects that the automated gates scored as passing.",
+      },
+      {
+        title: "Closed a scoring exploit",
+        body: "An agent could score a perfect 1.0 by printing the graded test IDs without running a single test. Fixed with per-run secret tokens injected into test names at verify time, making the pass signal impossible to fake.",
+      },
+      {
+        title: "Found a silent coverage gap",
+        body: "The oracle solution was missing 13 of the PR's own test files, leaving repository tests failing while the reward still showed 1.0. Traced it to one root cause and restored full PR integrity with an automated audit.",
+      },
+      {
+        title: "Peer-reviewed submissions with reproduced evidence",
+        body: "Reviewed other contributors' tasks and proved each finding in a container — including using git forensics (loose objects, missing remote, commit metadata) to show a shipped repo was a fresh git init with a fabricated base commit SHA.",
+      },
+    ],
+    stack: "Python · TypeScript · Rust · Docker · Git internals · Bash · PowerShell · pytest · Jest · Cargo · pnpm/uv · JSON/TOML config · CI log debugging · LLM-as-judge evaluation",
     skills: ["AI evaluation", "Model quality", "Technical reasoning"],
   },
   {
@@ -180,6 +208,7 @@ export default function Home() {
                     <div className="experience-title"><div><h3>{experience.role}</h3><p>{experience.linkedin ? <a className="company-link" href={experience.linkedin} target="_blank" rel="noreferrer">{experience.company} <span aria-hidden="true">↗</span></a> : experience.company}</p></div>{experience.current && <span>Current</span>}</div>
                     <small>{experience.date} · {experience.location}</small>
                     <p>{experience.description}</p>
+                    {experience.details && <ExperienceDetails details={experience.details} stack={experience.stack} />}
                     <div className="experience-skills">{experience.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
                   </div>
                 </RevealItem>
@@ -227,13 +256,13 @@ export default function Home() {
         <aside className="side-column">
           <Reveal as="section" className="side-card open-card" from="right"><span className="side-icon">◎</span><h3>Open to work</h3><p>Full Stack Engineer, AI Engineer, Agentic AI, or a role combining all three.</p><a href={`mailto:${CONTACT_EMAIL}`}>Start a conversation</a></Reveal>
           <Reveal as="section" className="side-card" from="right" delay={0.05}><h3>Current</h3><div className="side-role"><span className="has-mark"><Image src="/logos/snorkel-ai.png" alt="Snorkel AI logo" width={34} height={34} /></span><p><strong>AI Expert</strong><small><a className="company-link" href="https://www.linkedin.com/company/snorkel-ai/" target="_blank" rel="noreferrer">Snorkel AI ↗</a> · Since July 2026</small></p></div><div className="side-role"><span className="has-mark"><Image src="/logos/outlier.svg" alt="Outlier logo" width={34} height={34} /></span><p><strong>AI Engineer &amp; Trainer</strong><small><a className="company-link" href="https://www.linkedin.com/company/try-outlier/" target="_blank" rel="noreferrer">Outlier ↗</a> · Remote</small></p></div></Reveal>
-          <Reveal as="section" className="side-card" from="right" delay={0.1}><h3>Education</h3><div className="education-mark">GGV</div><strong>B.Tech, Information Technology</strong><p>Guru Ghasidas Vishwavidyalaya<br />2022 - 2026 · Bilaspur</p></Reveal>
+          <Reveal as="section" className="side-card" from="right" delay={0.1}><h3>Education</h3><div className="education-mark has-mark"><Image src="/logos/ggv-crest.png" alt="Guru Ghasidas Vishwavidyalaya crest" width={56} height={56} /></div><strong>B.Tech, Information Technology</strong><p><a className="company-link" href="https://ggu.ac.in/index" target="_blank" rel="noreferrer">Guru Ghasidas Vishwavidyalaya ↗</a><br />2022 - 2026 · Bilaspur</p></Reveal>
           <Reveal as="section" className="side-card resume-card" from="right" delay={0.15}><span>PDF · 1 page</span><h3>Recruiter-ready resume</h3><p>Experience, technical stack, product highlights, and education in one download.</p><a href={RESUME_PATH} download>Download resume ↓</a></Reveal>
           <Reveal as="section" className="side-card ask-card" from="right" delay={0.2}><span>✦</span><h3>Short on time?</h3><p>Use the resume chatbot in the corner and ask about skills, projects, or experience.</p></Reveal>
         </aside>
       </div>
 
-      <footer className="social-footer page-shell"><div><span className="nav-brand"><b>RK</b></span><p><strong>Raghunandan Kumar</strong><small>Full Stack &amp; Agentic AI Engineer</small></p></div><nav><a href="#about">About</a><Link href="/projects">Projects</Link><a href="#experience">Experience</a><a href="#contact">Contact</a></nav><p>© 2026 · Designed and developed by Raghunandan Kumar</p></footer>
+      <footer className="social-footer page-shell"><div><span className="footer-photo"><ProfileAvatar size={44} /></span><p><strong>Raghunandan Kumar</strong><small>Full Stack &amp; Agentic AI Engineer</small></p></div><nav><a href="#about">About</a><Link href="/projects">Projects</Link><a href="#experience">Experience</a><a href="#contact">Contact</a></nav><p>© 2026 · Designed and developed by Raghunandan Kumar</p></footer>
     </main>
   );
 }

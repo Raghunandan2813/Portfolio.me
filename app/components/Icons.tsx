@@ -17,6 +17,49 @@ const base = {
   "aria-hidden": true,
 };
 
+/* --- Navigation ------------------------------------------------------------
+   Conventional shapes on purpose. These replaced Unicode glyphs (⌂ ▦ ◫ ✦)
+   that gave no clue what they linked to once the text labels were hidden on
+   phones. A person, a folder, a briefcase, layers and an envelope are icons
+   people already know from every other app. */
+
+export function PersonIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+    </svg>
+  );
+}
+
+export function FolderIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h6a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+    </svg>
+  );
+}
+
+export function BriefcaseIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="2.5" y="7.5" width="19" height="12" rx="2" />
+      <path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5" />
+      <path d="M2.5 12.5h19" />
+    </svg>
+  );
+}
+
+export function LayersIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="m12 3 8.5 4.5L12 12 3.5 7.5Z" />
+      <path d="m3.5 12.5 8.5 4.5 8.5-4.5" />
+      <path d="m3.5 17 8.5 4.5 8.5-4.5" />
+    </svg>
+  );
+}
+
 export function MailIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
