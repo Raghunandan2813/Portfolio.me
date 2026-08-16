@@ -32,15 +32,15 @@ type Star = {
 const stars: Star[] = (() => {
   const random = mulberry32(20260816);
   const out: Star[] = [];
-  for (let i = 0; i < 70; i += 1) {
+  for (let i = 0; i < 96; i += 1) {
     out.push({
       left: Number((random() * 100).toFixed(3)),
       // Keep stars in the upper two-thirds so they sit above the ridgeline.
       top: Number((random() * 68).toFixed(3)),
-      size: Number((random() * 1.7 + 1).toFixed(2)),
+      size: Number((random() * 2.1 + 1.1).toFixed(2)),
       delay: Number((random() * 4).toFixed(2)),
       duration: Number((random() * 2.6 + 1.8).toFixed(2)),
-      bright: random() > 0.82,
+      bright: random() > 0.7,
     });
   }
   return out;
