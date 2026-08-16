@@ -1,6 +1,7 @@
 import { asc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { experiences, type ExperienceRow } from "@/db/schema";
+import { buildCached } from "./build-cache";
 
 /**
  * Shape the experience feed renders. Kept separate from the DB row so the
@@ -41,6 +42,7 @@ function toExperience(row: ExperienceRow): Experience {
 }
 
 export async function listExperiences(): Promise<Experience[]> {
+  return buildCached("experiences", async () => {
   try {
     const db = await getDb();
     const rows = await db
@@ -53,4 +55,5 @@ export async function listExperiences(): Promise<Experience[]> {
     console.error("Failed to load experiences", error);
     return [];
   }
+  });
 }

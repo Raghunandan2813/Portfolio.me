@@ -79,6 +79,39 @@ function storageClient() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
+/**
+ * Stores an uploaded image and returns its public URL.
+ *
+ * Used for testimonial portraits. LinkedIn answers automated requests with
+ * HTTP 999, so a profile photo cannot be fetched from its URL the way a
+ * company logo can be fetched from a company's own site — it has to be
+ * uploaded by hand.
+ */
+export async function uploadImage(
+  file: File,
+  prefix: string,
+): Promise<{ url: string } | { error: string }> {
+  if (!file || file.size === 0) return { error: "No file selected" };
+  if (!file.type.startsWith("image/")) return { error: "That is not an image" };
+  if (file.size > MAX_BYTES) return { error: "Image must be under 2MB" };
+
+  const storage = storageClient();
+  if (!storage) return { error: "SUPABASE_SERVICE_ROLE_KEY is not set" };
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const path = `${prefix}-${Date.now()}.${extensionFor(file.type)}`;
+  const { error } = await storage.storage
+    .from(BUCKET)
+    .upload(path, bytes, { contentType: file.type, upsert: true });
+  if (error) {
+    console.error("Image upload failed", error.message);
+    return { error: error.message };
+  }
+
+  const { data } = storage.storage.from(BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
 export async function fetchBrandLogo(
   input: string,
 ): Promise<{ url: string; source: string } | null> {

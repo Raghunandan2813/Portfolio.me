@@ -16,6 +16,7 @@ import {
   SITE_URL,
   PROFILE_PHOTO,
   absoluteUrl,
+  jsonLd,
 } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -163,7 +164,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([personSchema, websiteSchema, profilePageSchema]),
+            __html: jsonLd([personSchema, websiteSchema, profilePageSchema]),
           }}
         />
       </body>

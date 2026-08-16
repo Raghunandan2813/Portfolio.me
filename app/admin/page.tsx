@@ -4,16 +4,21 @@ import { redirect } from "next/navigation";
 import { getAdmin } from "@/lib/auth";
 import { listExperiences } from "@/lib/experiences";
 import { listProjectRows } from "@/lib/projects";
+import { listTestimonialRows } from "@/lib/testimonials";
 import {
   createExperience,
   createProject,
+  createTestimonial,
   deleteExperience,
   deleteProject,
+  deleteTestimonial,
   updateExperience,
   updateProject,
+  updateTestimonial,
 } from "./actions";
 import { ExperienceForm } from "./ExperienceForm";
 import { ProjectForm } from "./ProjectForm";
+import { TestimonialForm } from "./TestimonialForm";
 import { SignOut } from "./SignOut";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -24,7 +29,11 @@ export default async function AdminPage() {
   const admin = await getAdmin();
   if (!admin) redirect("/admin/login");
 
-  const [roles, projectRows] = await Promise.all([listExperiences(), listProjectRows()]);
+  const [roles, projectRows, testimonialRows] = await Promise.all([
+    listExperiences(),
+    listProjectRows(),
+    listTestimonialRows(),
+  ]);
 
   return (
     <main className="admin-shell">
@@ -98,6 +107,42 @@ export default async function AdminPage() {
               <form action={deleteProject} className="admin-delete">
                 <input type="hidden" name="id" value={project.id} />
                 <button type="submit">Delete this project</button>
+              </form>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="admin-section">
+        <h2>Add a testimonial</h2>
+        <details className="admin-item">
+          <summary><strong>New testimonial</strong><span>Opens the full form</span></summary>
+          <div className="admin-form-wrap">
+            <TestimonialForm action={createTestimonial} submitLabel="Add testimonial" />
+          </div>
+        </details>
+      </section>
+
+      <section className="admin-section">
+        <h2>Current testimonials <i>{testimonialRows.length}</i></h2>
+        {testimonialRows.length === 0 && <p className="admin-note">No testimonials yet.</p>}
+        <div className="admin-list">
+          {testimonialRows.map((testimonial) => (
+            <details key={testimonial.id} className="admin-item">
+              <summary>
+                <strong>{testimonial.name}</strong>
+                <span>{"★".repeat(testimonial.rating)}</span>
+              </summary>
+              <div className="admin-form-wrap">
+                <TestimonialForm
+                  action={updateTestimonial}
+                  submitLabel="Save changes"
+                  testimonial={testimonial}
+                />
+              </div>
+              <form action={deleteTestimonial} className="admin-delete">
+                <input type="hidden" name="id" value={testimonial.id} />
+                <button type="submit">Delete this testimonial</button>
               </form>
             </details>
           ))}

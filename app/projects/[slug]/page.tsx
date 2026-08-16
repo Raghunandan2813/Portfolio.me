@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProjectMedia } from "../../components/ProjectMedia";
 import { Reveal } from "../../components/Reveal";
 import { getProject, listProjects } from "@/lib/projects";
-import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
+import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd } from "@/lib/site";
 
 type ProjectPageProps = { params: Promise<{ slug: string }> };
 
@@ -76,7 +76,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([projectSchema, breadcrumbSchema]),
+          __html: jsonLd([projectSchema, breadcrumbSchema]),
         }}
       />
       <div className="page-shell">

@@ -18,12 +18,17 @@ import { VisitorCounter } from "./components/VisitorCounter";
 import { skillGroups } from "./data/portfolio";
 import { listExperiences } from "@/lib/experiences";
 import { listProjects } from "@/lib/projects";
+import { listTestimonials } from "@/lib/testimonials";
 import { CONTACT_EMAIL, GITHUB_PROFILE_URL, LINKEDIN_URL } from "@/lib/site";
 
 const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
 export default async function Home() {
-  const [experiences, projects] = await Promise.all([listExperiences(), listProjects()]);
+  const [experiences, projects, testimonials] = await Promise.all([
+    listExperiences(),
+    listProjects(),
+    listTestimonials(),
+  ]);
   return (
     <main className="social-app" id="top">
       <Reveal as="section" className="profile-card page-shell" from="scale" amount={0.05}>
@@ -170,11 +175,55 @@ export default async function Home() {
 
           <Reveal as="section" className="feed-card testimonials-feed" id="testimonials">
             <div className="feed-heading compact-heading"><div><span className="eyebrow">Testimonials</span><h2>Verified words only.</h2><p>I will never publish a made-up recommendation.</p></div></div>
-            <div className="testimonial-placeholder">
-              <span className="quote-mark">“</span>
-              <blockquote>Professional feedback from collaborators, managers, or clients will appear here once it is provided and approved.</blockquote>
-              <div><span className="placeholder-avatar">+</span><p><strong>References available on request</strong><small>Add a real quote, name, role, company, and profile link.</small></p></div>
-            </div>
+            {testimonials.length === 0 ? (
+              <div className="testimonial-placeholder">
+                <span className="quote-mark">“</span>
+                <blockquote>Professional feedback from collaborators, managers, or clients will appear here once it is provided and approved.</blockquote>
+                <div><span className="placeholder-avatar">+</span><p><strong>References available on request</strong><small>Add a real quote, name, role, company, and profile link.</small></p></div>
+              </div>
+            ) : (
+              <RevealGroup className="testimonial-list" stagger={0.08}>
+                {testimonials.map((testimonial) => (
+                  <RevealItem className="testimonial-card" key={testimonial.id} as="article" from="up">
+                    <span className="quote-mark">“</span>
+                    {testimonial.rating > 0 && (
+                      <div className="testimonial-stars" aria-label={`${testimonial.rating} out of 5`}>
+                        {/* aria-hidden on the glyphs so a screen reader reads the
+                            label once instead of "star star star star star". */}
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} className={star <= testimonial.rating ? "is-on" : ""} aria-hidden="true">★</span>
+                        ))}
+                      </div>
+                    )}
+                    <blockquote>{testimonial.quote}</blockquote>
+                    <div className="testimonial-by">
+                      <span className="testimonial-avatar">
+                        {testimonial.photo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={testimonial.photo} alt={testimonial.name} loading="lazy" />
+                        ) : (
+                          testimonial.initials
+                        )}
+                      </span>
+                      <p>
+                        <strong>
+                          {testimonial.linkedin ? (
+                            <a className="company-link" href={testimonial.linkedin} target="_blank" rel="noreferrer">
+                              {testimonial.name} <span aria-hidden="true">↗</span>
+                            </a>
+                          ) : (
+                            testimonial.name
+                          )}
+                        </strong>
+                        {(testimonial.title || testimonial.company) && (
+                          <small>{[testimonial.title, testimonial.company].filter(Boolean).join(" · ")}</small>
+                        )}
+                      </p>
+                    </div>
+                  </RevealItem>
+                ))}
+              </RevealGroup>
+            )}
           </Reveal>
 
           <Reveal as="section" className="feed-card contact-feed" id="contact">

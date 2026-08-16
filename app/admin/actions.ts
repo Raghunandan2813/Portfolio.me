@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { experiences, projectsTable } from "@/db/schema";
+import { experiences, projectsTable, testimonials } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
-import { fetchBrandLogo } from "@/lib/brand";
+import { fetchBrandLogo, uploadImage } from "@/lib/brand";
 
 /**
  * Mutations for the admin dashboard.
@@ -198,6 +198,80 @@ export async function deleteProject(formData: FormData) {
 
   await db.delete(projectsTable).where(eq(projectsTable.id, id));
   revalidateProject(existing?.slug ?? "");
+}
+
+/* --- Testimonials --------------------------------------------------------- */
+
+function readTestimonialForm(formData: FormData) {
+  const name = String(formData.get("name") || "").trim();
+  const quote = String(formData.get("quote") || "").trim();
+  if (!name) throw new Error("Name is required");
+  if (!quote) throw new Error("Quote is required");
+
+  // Clamped rather than validated-and-rejected: a rating outside 1-5 is a
+  // slider bug, not something worth losing the typed quote over.
+  const rating = Math.min(5, Math.max(1, Number(formData.get("rating") || 5) || 5));
+
+  return {
+    name,
+    title: String(formData.get("title") || "").trim(),
+    company: String(formData.get("company") || "").trim(),
+    quote,
+    rating,
+    photoUrl: String(formData.get("photoUrl") || "").trim() || null,
+    linkedinUrl: String(formData.get("linkedinUrl") || "").trim() || null,
+    sortOrder: Number(formData.get("sortOrder") || 0) || 0,
+  };
+}
+
+export async function createTestimonial(formData: FormData) {
+  await requireAdmin();
+  const db = await getDb();
+  await db.insert(testimonials).values(readTestimonialForm(formData));
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function updateTestimonial(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) throw new Error("Invalid id");
+
+  const db = await getDb();
+  await db.update(testimonials).set(readTestimonialForm(formData)).where(eq(testimonials.id, id));
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function deleteTestimonial(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) throw new Error("Invalid id");
+
+  const db = await getDb();
+  await db.delete(testimonials).where(eq(testimonials.id, id));
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+/**
+ * Uploads a portrait and hands back its public URL.
+ *
+ * Returns a message instead of throwing so a failed upload does not discard
+ * the quote the admin has already typed into the neighbouring form.
+ */
+export async function uploadPhoto(
+  _previous: { photoUrl?: string; message?: string } | null,
+  formData: FormData,
+): Promise<{ photoUrl?: string; message?: string }> {
+  await requireAdmin();
+
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0) return { message: "Choose an image first" };
+
+  const result = await uploadImage(file, "testimonial");
+  if ("error" in result) return { message: result.error };
+  return { photoUrl: result.url, message: "Uploaded" };
 }
 
 /**

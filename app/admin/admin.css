@@ -93,6 +93,21 @@
 }
 .admin-lookup > div { display: flex; gap: 8px; align-items: center; }
 .admin-lookup-msg { color: var(--muted); font-size: 11px; }
+/* Star rating: real radios, so it is keyboard-navigable and posts without JS. */
+.admin-stars { display: flex; align-items: center; gap: 3px; }
+.admin-stars label { cursor: pointer; line-height: 1; }
+.admin-stars label input { position: absolute; opacity: 0; width: 0; height: 0; }
+.admin-stars label span { color: var(--line); font-size: 23px; transition: color .15s ease; }
+.admin-stars label.is-on span { color: var(--brand-2); }
+.admin-stars label:hover span { color: var(--brand-1); }
+.admin-stars label input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+.admin-stars b { margin-left: 8px; color: var(--muted); font-size: 11px; }
+
+.admin-photo-preview {
+  width: 56px; height: 56px; object-fit: cover;
+  border-radius: 50%; box-shadow: 0 0 0 2px var(--primary);
+}
+
 .admin-logo-preview {
   width: 46px; height: 46px; padding: 4px;
   border: 1px solid var(--line); border-radius: 10px;

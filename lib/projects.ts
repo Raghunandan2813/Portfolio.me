@@ -1,6 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { projectsTable, type ProjectRow } from "@/db/schema";
+import { buildCached } from "./build-cache";
 import type { Project } from "@/app/data/portfolio";
 import { projects as fallbackProjects } from "@/app/data/portfolio";
 
@@ -39,6 +40,7 @@ function toProject(row: ProjectRow): Project {
 }
 
 export async function listProjects(): Promise<Project[]> {
+  return buildCached("projects", async () => {
   try {
     const db = await getDb();
     const rows = await db
@@ -52,9 +54,18 @@ export async function listProjects(): Promise<Project[]> {
     console.error("Failed to load projects, serving bundled copy", error);
     return fallbackProjects;
   }
+  });
 }
 
 export async function getProject(slug: string): Promise<Project | null> {
+  // During a build the full list is already memoised, so resolve from it rather
+  // than issuing another query for every slug. At runtime the single-row query
+  // below is cheaper than fetching every project to discard all but one.
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    const all = await listProjects();
+    return all.find((project) => project.slug === slug) ?? null;
+  }
+
   try {
     const db = await getDb();
     const [row] = await db

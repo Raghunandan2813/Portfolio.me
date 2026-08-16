@@ -66,3 +66,20 @@ export const OG_IMAGE = {
 export function absoluteUrl(path = "/") {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
+
+/**
+ * Serialises structured data for a `<script type="application/ld+json">`.
+ *
+ * `JSON.stringify` alone is unsafe inside a script element: the HTML parser
+ * ends the script at the first literal `</script>`, wherever it appears —
+ * including in the middle of a JSON string. A project summary containing that
+ * sequence would break out of the tag and inject markup into the page.
+ *
+ * Escaping `<` as `<` is still valid JSON and parses identically, so the
+ * structured data is unchanged while the byte the parser looks for is gone.
+ * This mattered once project and experience content moved into the database
+ * and became editable at runtime rather than fixed in the bundle.
+ */
+export function jsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}

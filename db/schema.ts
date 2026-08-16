@@ -92,6 +92,35 @@ export const projectsTable = pgTable("projects", {
 
 export type ProjectRow = typeof projectsTable.$inferSelect;
 
+/**
+ * Recommendations shown in the testimonials feed.
+ *
+ * `rating` is stored 1-5 and clamped on write. It is nullable-by-default of 5
+ * rather than optional because a recommendation without a rating renders an
+ * empty star row, which reads as zero rather than as "not given".
+ *
+ * `photoUrl` is a Supabase Storage URL. LinkedIn profile photos cannot be
+ * fetched programmatically — linkedin.com answers automated requests with
+ * HTTP 999 — so the image is uploaded through the admin form instead.
+ */
+export const testimonials = pgTable("testimonials", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  /** Job title, e.g. "Founder". */
+  title: text("title").notNull().default(""),
+  company: text("company").notNull().default(""),
+  quote: text("quote").notNull(),
+  rating: integer("rating").notNull().default(5),
+  photoUrl: text("photo_url"),
+  linkedinUrl: text("linkedin_url"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type TestimonialRow = typeof testimonials.$inferSelect;
+
 export const siteStats = pgTable("site_stats", {
   id: text("id").primaryKey(),
   totalViews: integer("total_views").notNull().default(0),
