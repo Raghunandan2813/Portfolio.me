@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BannerScene } from "./components/BannerScene";
 import { ContactForm } from "./components/ContactForm";
@@ -18,10 +19,28 @@ import { CONTACT_EMAIL, GITHUB_PROFILE_URL, LINKEDIN_URL } from "@/lib/site";
 
 const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
-const experiences = [
+type Experience = {
+  company: string;
+  /** Fallback initial, shown when no logo file is present. */
+  monogram: string;
+  /** Official mark, taken from each company's own site. */
+  logo?: string;
+  /** Company page. Renders the company name as a link when set. */
+  linkedin?: string;
+  role: string;
+  date: string;
+  location: string;
+  current?: boolean;
+  description: string;
+  skills: string[];
+};
+
+const experiences: Experience[] = [
   {
     company: "Snorkel AI",
     monogram: "S",
+    logo: "/logos/snorkel-ai.png",
+    linkedin: "https://www.linkedin.com/company/snorkel-ai/",
     role: "AI Expert",
     date: "July 2026 - Present",
     location: "Remote",
@@ -32,6 +51,8 @@ const experiences = [
   {
     company: "Outlier",
     monogram: "O",
+    logo: "/logos/outlier.svg",
+    linkedin: "https://www.linkedin.com/company/try-outlier/",
     role: "AI Engineer and Trainer",
     date: "June 2026 - Present",
     location: "Remote · San Francisco, USA",
@@ -42,6 +63,7 @@ const experiences = [
   {
     company: "TurboML",
     monogram: "T",
+    logo: "/logos/turboml.png",
     role: "Software Engineering Intern (AI)",
     date: "April 2025 - May 2026",
     location: "Remote · California, USA",
@@ -149,9 +171,13 @@ export default function Home() {
             <RevealGroup className="experience-list" stagger={0.09}>
               {experiences.map((experience) => (
                 <RevealItem key={experience.company} from="right" as="article">
-                  <div className={`company-logo ${experience.current ? "current" : ""}`}>{experience.monogram}</div>
+                  <div className={`company-logo ${experience.logo ? "has-mark" : ""} ${experience.current ? "current" : ""}`}>
+                    {experience.logo
+                      ? <Image src={experience.logo} alt={`${experience.company} logo`} width={50} height={50} />
+                      : experience.monogram}
+                  </div>
                   <div className="experience-copy">
-                    <div className="experience-title"><div><h3>{experience.role}</h3><p>{experience.company}</p></div>{experience.current && <span>Current</span>}</div>
+                    <div className="experience-title"><div><h3>{experience.role}</h3><p>{experience.linkedin ? <a className="company-link" href={experience.linkedin} target="_blank" rel="noreferrer">{experience.company} <span aria-hidden="true">↗</span></a> : experience.company}</p></div>{experience.current && <span>Current</span>}</div>
                     <small>{experience.date} · {experience.location}</small>
                     <p>{experience.description}</p>
                     <div className="experience-skills">{experience.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
@@ -200,7 +226,7 @@ export default function Home() {
 
         <aside className="side-column">
           <Reveal as="section" className="side-card open-card" from="right"><span className="side-icon">◎</span><h3>Open to work</h3><p>Full Stack Engineer, AI Engineer, Agentic AI, or a role combining all three.</p><a href={`mailto:${CONTACT_EMAIL}`}>Start a conversation</a></Reveal>
-          <Reveal as="section" className="side-card" from="right" delay={0.05}><h3>Current</h3><div className="side-role"><span>S</span><p><strong>AI Expert</strong><small>Snorkel AI · Since July 2026</small></p></div><div className="side-role"><span>O</span><p><strong>AI Engineer &amp; Trainer</strong><small>Outlier · Remote</small></p></div></Reveal>
+          <Reveal as="section" className="side-card" from="right" delay={0.05}><h3>Current</h3><div className="side-role"><span className="has-mark"><Image src="/logos/snorkel-ai.png" alt="Snorkel AI logo" width={34} height={34} /></span><p><strong>AI Expert</strong><small><a className="company-link" href="https://www.linkedin.com/company/snorkel-ai/" target="_blank" rel="noreferrer">Snorkel AI ↗</a> · Since July 2026</small></p></div><div className="side-role"><span className="has-mark"><Image src="/logos/outlier.svg" alt="Outlier logo" width={34} height={34} /></span><p><strong>AI Engineer &amp; Trainer</strong><small><a className="company-link" href="https://www.linkedin.com/company/try-outlier/" target="_blank" rel="noreferrer">Outlier ↗</a> · Remote</small></p></div></Reveal>
           <Reveal as="section" className="side-card" from="right" delay={0.1}><h3>Education</h3><div className="education-mark">GGV</div><strong>B.Tech, Information Technology</strong><p>Guru Ghasidas Vishwavidyalaya<br />2022 - 2026 · Bilaspur</p></Reveal>
           <Reveal as="section" className="side-card resume-card" from="right" delay={0.15}><span>PDF · 1 page</span><h3>Recruiter-ready resume</h3><p>Experience, technical stack, product highlights, and education in one download.</p><a href={RESUME_PATH} download>Download resume ↓</a></Reveal>
           <Reveal as="section" className="side-card ask-card" from="right" delay={0.2}><span>✦</span><h3>Short on time?</h3><p>Use the resume chatbot in the corner and ask about skills, projects, or experience.</p></Reveal>

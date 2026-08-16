@@ -86,6 +86,10 @@
   /* Always bright: sits on the dark panel in both themes */
   --panel-accent: #ffc300;
 
+  /* Tile behind a company logo. Deliberately light in both themes: the Outlier
+     mark is a black rounded square, which would vanish on a dark tile. */
+  --logo-tile: #ffffff;
+
   /* Cursor cat */
   --cat-ink: #2c3e50;
   --cat-eye: #ffd400;
@@ -131,6 +135,8 @@
   --panel-soft: #7c7c7c;
   --panel-line: rgba(255, 255, 255, 0.11);
   --panel-accent: #ffd400;
+  /* Slightly off-white so a logo tile does not glare against true black. */
+  --logo-tile: #f1f1f1;
 
   --indigo: #ffc300;
   --indigo-strong: #ffd400;
@@ -657,6 +663,19 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .experience-list > article:last-child { border-bottom: 0; }
 .company-logo { width: 50px; height: 50px; display: grid; place-items: center; border-radius: 11px; background: var(--panel); color: #fff; font-size: 20px; font-weight: 900; }
 .company-logo.current { background: linear-gradient(140deg, var(--indigo), var(--violet)); }
+
+/* Real marks sit on a neutral tile instead of the brand gradient, which would
+   otherwise fight the logo's own colours. `contain` keeps each mark's aspect
+   ratio whatever shape the source file is. */
+.company-logo.has-mark, .company-logo.has-mark.current { background: var(--logo-tile); border: 1px solid var(--line); padding: 7px; }
+.company-logo img, .side-role > span img { width: 100%; height: 100%; object-fit: contain; }
+
+/* The company name doubles as a link to its page. Kept the same colour as the
+   surrounding meta text so it does not shout; the arrow signals the link. */
+.company-link { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; transition: color .2s ease, border-color .2s ease; }
+.company-link span, .company-link { white-space: nowrap; }
+.company-link:hover { color: var(--primary); border-bottom-color: currentColor; }
+.side-role > span.has-mark { background: var(--logo-tile); border: 1px solid var(--line); padding: 5px; }
 .experience-title { display: flex; justify-content: space-between; gap: 20px; }
 .experience-title h3 { margin: 0; font-size: 16px; }
 .experience-title p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
