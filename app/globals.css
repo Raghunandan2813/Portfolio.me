@@ -194,7 +194,6 @@
    ========================================================================= */
 
 * { box-sizing: border-box; }
-html { overflow-x: clip; }
 html { scroll-behavior: smooth; scroll-padding-top: 86px; }
 body {
   /* Positioning context for the document-spanning .sun-shine overlay. */
@@ -447,6 +446,20 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .is-running .cat-torso { animation: catBob .2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .is-running .cat-tail { animation: tailStream .34s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 60%; }
 @keyframes tailStream { 0%, 100% { transform: rotate(-24deg); } 50% { transform: rotate(-12deg); } }
+
+/* Attention ring on the resume launcher. It is fixed to the viewport so it
+   stays put through the whole page; the pulse is what makes people notice it. */
+.chat-launcher { position: relative; }
+.chat-launcher::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 999px;
+  border: 2px solid var(--primary); opacity: 0; pointer-events: none;
+  animation: launcherPulse 3.2s ease-out infinite;
+}
+.resume-chat.open .chat-launcher::after { animation: none; }
+@keyframes launcherPulse {
+  0% { transform: scale(.96); opacity: .75; }
+  70%, 100% { transform: scale(1.16); opacity: 0; }
+}
 
 /* --- Sitting: haunches down, front legs straight, tail curls ------------ */
 .is-sitting .cat-leg-bl, .is-sitting .cat-leg-br { transform: translateY(4px) scaleY(.55); }
@@ -1107,7 +1120,7 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
   .profile-card { border-radius: 14px; }.profile-banner { height: 170px; }.banner-code { top: 18px; left: 18px; }.banner-copy { left: 18px; bottom: 20px; }.banner-copy small { font-size: 22px; }.profile-body { padding: 0 16px 20px; }.avatar-ring { width: 124px; height: 124px; margin-top: -65px; padding: 3px; box-shadow: 0 0 0 3px var(--surface); }.profile-avatar { border-width: 3px; font-size: 30px; }.profile-actions { top: 14px; right: 14px; gap: 6px; }.icon-link { width: 34px; height: 34px; }.icon-link svg { width: 15px; height: 15px; }.identity-row { display: block; }.identity-row h1 { font-size: 24px; }.identity-row .handle { margin-top: 3px; }.profile-headline { font-size: 14px; }.profile-links { flex-direction: column; gap: 9px; }.profile-stats { grid-template-columns: 1fr 1fr; }.profile-stats > div { min-height: 70px; padding: 15px 12px; border-bottom: 1px solid var(--line); }.profile-stats > div:nth-child(2) { border-right: 0; }.profile-stats > div:nth-child(3), .profile-stats > div:nth-child(4) { border-bottom: 0; }.profile-stats > div:first-child { padding-left: 12px; }
   .post-copy { padding: 25px 20px; }.post-copy h2 { font-size: 29px; }.post-reactions { justify-content: flex-start; gap: 16px; overflow-x: auto; white-space: nowrap; }.feed-heading { display: block; padding: 24px 20px 20px; }.feed-heading > a { display: inline-block; margin-top: 14px; }.feed-heading h2 { font-size: 27px; }.work-bento { display: block; padding-inline: 10px; }.bento-project { margin-bottom: 10px; }.bento-1 .product-frame { min-height: 260px; }.bento-1 .mock-browser { min-height: 212px; }.bento-1 .mock-body { min-height: 177px; }.bento-project-copy h3 { font-size: 22px; }
   .github-repos { grid-template-columns: 1fr; padding-inline: 10px; }.contribution-card { padding: 23px 18px; }.contribution-top { display: block; }.contribution-stats { margin-top: 15px; }.heatmap { grid-auto-columns: 9px; grid-template-rows: repeat(7,9px); gap: 2px; }.heatmap > i, .heatmap-legend i { width: 9px; height: 9px; }.heatmap-legend > span:first-child { display: none; }
-  .experience-list > article { grid-template-columns: 42px 1fr; gap: 12px; padding: 22px 18px; }.company-logo { width: 42px; height: 42px; }.experience-title { display: block; }.experience-title > span { margin-top: 7px; }.stack-intro { padding: 30px 22px; }.stack-intro h2 { font-size: 31px; }.skill-matrix { grid-template-columns: 1fr; }.skill-matrix article, .skill-matrix article:last-child { grid-column: auto; border-right: 0; min-height: auto; }.testimonial-placeholder { margin-inline: 10px; padding: 28px 23px; }.testimonial-placeholder blockquote { font-size: 17px; }.contact-feed { padding: 20px 14px; }.form-row { grid-template-columns: 1fr; gap: 0; }.resume-chat { right: 10px; bottom: 10px; }.chat-launcher { height: 44px; padding: 0 6px; }.chat-launcher b { display: none; }.chat-launcher span { width: 32px; height: 32px; }
+  .experience-list > article { grid-template-columns: 42px 1fr; gap: 12px; padding: 22px 18px; }.company-logo { width: 42px; height: 42px; }.experience-title { display: block; }.experience-title > span { margin-top: 7px; }.stack-intro { padding: 30px 22px; }.stack-intro h2 { font-size: 31px; }.skill-matrix { grid-template-columns: 1fr; }.skill-matrix article, .skill-matrix article:last-child { grid-column: auto; border-right: 0; min-height: auto; }.testimonial-placeholder { margin-inline: 10px; padding: 28px 23px; }.testimonial-placeholder blockquote { font-size: 17px; }.contact-feed { padding: 20px 14px; }.form-row { grid-template-columns: 1fr; gap: 0; }.resume-chat { right: 10px; bottom: 10px; }.chat-launcher { height: 44px; padding: 0 14px 0 6px; }.chat-launcher b { font-size: 10px; }.chat-launcher span { width: 32px; height: 32px; }
   .social-footer { display: block; padding-bottom: 75px; }.social-footer nav { margin: 20px 0; flex-wrap: wrap; }.projects-page { padding-top: 24px; }.projects-hero { min-height: 480px; padding: 44px 24px; }.projects-hero h1 { font-size: 55px; }.projects-hero > div { flex-direction: column; align-items: stretch; }.archive-card { display: block; padding: 13px; }.archive-index { display: none; }.archive-card .product-frame { min-height: 220px; }.archive-card .mock-browser { min-height: 190px; }.archive-card .mock-body { min-height: 155px; }.archive-copy { padding: 18px 8px 12px; }.archive-copy h2 { font-size: 26px; }.projects-cta { padding: 45px 20px; }.projects-cta h2 { font-size: 36px; }
   .case-page { padding-top: 20px; }.case-hero { padding: 35px 23px; }.case-heading h1 { font-size: 49px; }.case-heading > p { font-size: 14px; }.case-actions { flex-direction: column; }.case-facts { grid-template-columns: 1fr; }.case-facts div { border-bottom: 1px solid var(--banner-hairline); }.case-demo, .case-build { padding: 24px 15px; }.case-section-heading h2 { font-size: 28px; }.case-demo .product-frame { min-height: 260px; padding: 13px; }.case-demo .mock-browser { min-height: 234px; }.case-demo .mock-body { min-height: 199px; }.case-demo .mock-canvas > strong { font-size: 18px; }.case-story { grid-template-columns: 1fr; }.case-story article { padding: 28px 22px; }.highlight-grid { grid-template-columns: 1fr; }.case-stack { grid-template-columns: 1fr; padding: 32px 22px; }.next-project { padding: 30px 22px; }.next-project strong { max-width: 80%; font-size: 21px; }
 }
