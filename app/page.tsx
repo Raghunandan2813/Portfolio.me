@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BannerScene } from "./components/BannerScene";
 import { Carousel } from "./components/Carousel";
 import { ContactForm } from "./components/ContactForm";
-import { ExperienceDetails } from "./components/ExperienceDetails";
+import { ExperienceTabs } from "./components/ExperienceTabs";
 import { GithubActivity } from "./components/GithubActivity";
 import { GithubProjects } from "./components/GithubProjects";
 import {
@@ -117,7 +117,7 @@ export default async function Home() {
             {projects.length > 3 && (
               <div className="work-overflow">
                 <span className="eyebrow">More work</span>
-                <Carousel label="More projects">
+                <Carousel label="More projects" autoPlay={7000}>
                   {projects.slice(3).map((project) => (
                     <div className="bento-project bento-carousel" key={project.slug}>
                       <ProjectMedia project={project} compact />
@@ -149,31 +149,7 @@ export default async function Home() {
 
           <Reveal as="section" className="feed-card experience-feed" id="experience">
             <div className="feed-heading compact-heading"><div><span className="eyebrow">Experience</span><h2>Where I have applied the work</h2></div></div>
-            <RevealGroup className="experience-list" stagger={0.09}>
-              {experiences.map((experience) => (
-                <RevealItem key={experience.id} from="right" as="article">
-                  <div className={`company-logo ${experience.logo ? "has-mark" : ""} ${experience.current ? "current" : ""}`}>
-                    {/* Plain img rather than next/image: logo URLs are entered
-                        at runtime and can point at Supabase Storage or the
-                        company's own CDN, so the host cannot be added to
-                        remotePatterns ahead of the build. */}
-                    {experience.logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={experience.logo} alt={`${experience.company} logo`} width={50} height={50} loading="lazy" />
-                    ) : (
-                      experience.monogram
-                    )}
-                  </div>
-                  <div className="experience-copy">
-                    <div className="experience-title"><div><h3>{experience.role}</h3><p>{experience.linkedin ? <a className="company-link" href={experience.linkedin} target="_blank" rel="noreferrer">{experience.company} <span aria-hidden="true">↗</span></a> : experience.company}</p></div>{experience.current && <span>Current</span>}</div>
-                    <small>{experience.date} · {experience.location}</small>
-                    {experience.description && <p>{experience.description}</p>}
-                    {experience.points && <ExperienceDetails points={experience.points} />}
-                    <div className="experience-skills">{experience.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
-                  </div>
-                </RevealItem>
-              ))}
-            </RevealGroup>
+            <ExperienceTabs experiences={experiences} />
           </Reveal>
 
           <Reveal as="section" className="stack-system" from="scale" id="stack">

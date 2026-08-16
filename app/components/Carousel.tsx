@@ -69,13 +69,28 @@ export function Carousel({
     };
   }, []);
 
+  // Only advance while the carousel is actually on screen. Without this it
+  // would cycle the whole time the page is open, so by the time you scrolled
+  // down you would arrive mid-sequence at an arbitrary slide.
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const node = trackRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.4 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   // Auto-advance, suspended while the user is interacting and disabled
   // entirely when the OS asks for reduced motion.
   useEffect(() => {
-    if (!autoPlay || !many || paused || reduceMotion) return;
+    if (!autoPlay || !many || paused || reduceMotion || !visible) return;
     const timer = setInterval(() => scrollTo(index + 1), autoPlay);
     return () => clearInterval(timer);
-  }, [autoPlay, many, paused, reduceMotion, index, scrollTo]);
+  }, [autoPlay, many, paused, reduceMotion, visible, index, scrollTo]);
 
   return (
     <div
