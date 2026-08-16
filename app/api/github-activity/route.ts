@@ -24,8 +24,13 @@ type CalendarResponse = {
   };
 };
 
-// v2: cache shape changed when private contributions were added.
-const CACHE_KEY = "github:activity:v2";
+/**
+ * Keyed by data source, not just version. Without this, adding a token would
+ * appear to do nothing until the previously cached public-only entry expired.
+ */
+function cacheKey(hasToken: boolean) {
+  return hasToken ? "github:activity:full:v2" : "github:activity:public:v2";
+}
 const CACHE_TTL_SECONDS = 60 * 60 * 3;
 const WINDOW_DAYS = 84; // 12 weeks
 
@@ -152,7 +157,8 @@ function buildDays(days: DayMap) {
 }
 
 export async function GET() {
-  const result = await cachedJson(CACHE_KEY, CACHE_TTL_SECONDS, fetchActivity);
+  const hasToken = Boolean(readEnv("GITHUB_TOKEN"));
+  const result = await cachedJson(cacheKey(hasToken), CACHE_TTL_SECONDS, fetchActivity);
   const days = buildDays(result?.value ?? {});
 
   return Response.json(
