@@ -24,15 +24,17 @@ type CalendarResponse = {
   };
 };
 
+const WINDOW_DAYS = 365; // full year, matching GitHub's own graph
 /**
- * Keyed by data source, not just version. Without this, adding a token would
- * appear to do nothing until the previously cached public-only entry expired.
+ * Keyed by everything that changes the stored shape: the data source and the
+ * window length. Keying on version alone meant a config change kept serving
+ * the previous payload until its TTL expired — which looked like the change
+ * having had no effect.
  */
 function cacheKey(hasToken: boolean) {
-  return hasToken ? "github:activity:full:v2" : "github:activity:public:v2";
+  return `github:activity:${hasToken ? "full" : "public"}:${WINDOW_DAYS}d`;
 }
 const CACHE_TTL_SECONDS = 60 * 60 * 3;
-const WINDOW_DAYS = 84; // 12 weeks
 
 const LEVELS: Record<string, number> = {
   NONE: 0,
@@ -140,15 +142,22 @@ async function fetchActivity(): Promise<DayMap> {
 /**
  * Grid is rebuilt per request rather than cached, so a cached response still
  * ends on today's date instead of the day it was stored.
+ *
+ * The range is snapped back to the preceding Sunday so that each column of the
+ * 7-row grid is a real calendar week, the way GitHub renders it. Without that,
+ * rows would not line up with days of the week.
  */
 function buildDays(days: DayMap) {
   const today = new Date();
-  const out: { date: string; count: number; level: number }[] = [];
+  today.setUTCHours(0, 0, 0, 0);
 
-  for (let offset = WINDOW_DAYS - 1; offset >= 0; offset -= 1) {
-    const date = new Date(today);
-    date.setUTCDate(today.getUTCDate() - offset);
-    const key = date.toISOString().slice(0, 10);
+  const start = new Date(today);
+  start.setUTCDate(today.getUTCDate() - (WINDOW_DAYS - 1));
+  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+
+  const out: { date: string; count: number; level: number }[] = [];
+  for (const cursor = new Date(start); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+    const key = cursor.toISOString().slice(0, 10);
     const entry = days[key];
     out.push({ date: key, count: entry?.count ?? 0, level: entry?.level ?? 0 });
   }
