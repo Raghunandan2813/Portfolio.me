@@ -664,19 +664,20 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .experience-list > article { display: grid; grid-template-columns: 52px 1fr; gap: 16px; padding: 25px 28px; border-bottom: 1px solid var(--line-soft); }
 .experience-list > article:last-child { border-bottom: 0; }
 /* --- Expandable role write-up --------------------------------------------- */
-.exp-details { margin: 12px 0 4px; }
-.exp-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); color: var(--primary); font: inherit; font-size: 10px; font-weight: 850; letter-spacing: .02em; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
+.exp-details { margin: 10px 0 2px; }
+
+/* The nested <ul> is a single <li> in the outer list, so its own bullets are
+   suppressed and the inner items carry the marker instead. That keeps the
+   folded group out of the DOM without breaking list semantics. */
+.exp-bullets, .exp-bullets ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.exp-bullets li { position: relative; padding-left: 17px; color: var(--muted); font-size: 12px; line-height: 1.62; }
+.exp-bullets li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+.exp-bullets-more { padding-left: 0 !important; animation: expDetailIn .3s ease both; }
+.exp-bullets-more::before { display: none; }
+
+.exp-toggle { margin-top: 11px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); color: var(--primary); font: inherit; font-size: 10px; font-weight: 850; letter-spacing: .02em; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
 .exp-toggle:hover { background: var(--surface-3); border-color: var(--primary); }
 .exp-toggle b { font-size: 11px; line-height: 1; }
-
-.exp-detail-body { margin-top: 14px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-2); animation: expDetailIn .32s ease both; }
-.exp-detail-body ol { margin: 0; padding: 0; list-style: none; counter-reset: exp; display: grid; gap: 14px; }
-.exp-detail-body li { counter-increment: exp; position: relative; padding-left: 30px; }
-.exp-detail-body li::before { content: counter(exp); position: absolute; left: 0; top: 1px; width: 21px; height: 21px; display: grid; place-items: center; border-radius: 6px; background: var(--primary); color: var(--on-primary, #fff); font-size: 10px; font-weight: 900; }
-.exp-detail-body strong { display: block; color: var(--ink); font-size: 12px; line-height: 1.35; }
-.exp-detail-body li p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
-.exp-detail-stack { margin: 16px 0 0; padding-top: 13px; border-top: 1px solid var(--line); color: var(--soft); font-size: 10px; line-height: 1.7; }
-.exp-detail-stack span { display: block; margin-bottom: 5px; color: var(--ink); font-size: 9px; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
 
 @keyframes expDetailIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 

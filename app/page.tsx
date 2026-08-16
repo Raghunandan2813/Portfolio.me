@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BannerScene } from "./components/BannerScene";
 import { ContactForm } from "./components/ContactForm";
-import { ExperienceDetails, type ExperienceDetail } from "./components/ExperienceDetails";
+import { ExperienceDetails } from "./components/ExperienceDetails";
 import { GithubActivity } from "./components/GithubActivity";
 import { GithubProjects } from "./components/GithubProjects";
 import {
@@ -32,11 +32,10 @@ type Experience = {
   date: string;
   location: string;
   current?: boolean;
-  description: string;
-  /** Expanded write-up, folded behind a "Read more" toggle. */
-  details?: ExperienceDetail[];
-  /** Rendered at the foot of the expanded write-up. */
-  stack?: string;
+  /** Single-paragraph summary. Omitted where `points` carries the detail. */
+  description?: string;
+  /** Bulleted detail. All but the first bullet fold behind a toggle. */
+  points?: string[];
   skills: string[];
 };
 
@@ -50,31 +49,18 @@ const experiences: Experience[] = [
     date: "July 2026 - Present",
     location: "Remote",
     current: true,
-    description: "Current work focused on AI quality and model evaluation for production-grade artificial intelligence systems.",
-    details: [
-      {
-        title: "Repaired and shipped agentic SWE benchmark tasks",
-        body: "Rebuilt 7+ returned tasks from real merged open-source PRs across Python, TypeScript and Rust repos, taking each through a multi-stage automated review gate to acceptance.",
-      },
-      {
-        title: "Built a Docker validation harness",
-        body: "Runs oracle, base, forgery and idempotence scenarios directly from the packed submission zip, reproducing the grading platform's real environment. Caught defects that the automated gates scored as passing.",
-      },
-      {
-        title: "Closed a scoring exploit",
-        body: "An agent could score a perfect 1.0 by printing the graded test IDs without running a single test. Fixed with per-run secret tokens injected into test names at verify time, making the pass signal impossible to fake.",
-      },
-      {
-        title: "Found a silent coverage gap",
-        body: "The oracle solution was missing 13 of the PR's own test files, leaving repository tests failing while the reward still showed 1.0. Traced it to one root cause and restored full PR integrity with an automated audit.",
-      },
-      {
-        title: "Peer-reviewed submissions with reproduced evidence",
-        body: "Reviewed other contributors' tasks and proved each finding in a container — including using git forensics (loose objects, missing remote, commit metadata) to show a shipped repo was a fresh git init with a fabricated base commit SHA.",
-      },
+    points: [
+      "Rebuilt 7+ returned tasks from real merged open-source PRs across Python, TypeScript and Rust repos, taking each through a multi-stage automated review gate to acceptance.",
+      "Runs oracle, base, forgery and idempotence scenarios directly from the packed submission zip, reproducing the grading platform's real environment. Caught defects that the automated gates scored as passing.",
+      "An agent could score a perfect 1.0 by printing the graded test IDs without running a single test. Fixed with per-run secret tokens injected into test names at verify time, making the pass signal impossible to fake.",
+      "The oracle solution was missing 13 of the PR's own test files, leaving repository tests failing while the reward still showed 1.0. Traced it to one root cause and restored full PR integrity with an automated audit.",
+      "Reviewed other contributors' tasks and proved each finding in a container — including using git forensics (loose objects, missing remote, commit metadata) to show a shipped repo was a fresh git init with a fabricated base commit SHA.",
     ],
-    stack: "Python · TypeScript · Rust · Docker · Git internals · Bash · PowerShell · pytest · Jest · Cargo · pnpm/uv · JSON/TOML config · CI log debugging · LLM-as-judge evaluation",
-    skills: ["AI evaluation", "Model quality", "Technical reasoning"],
+    skills: [
+      "Python", "TypeScript", "Rust", "Docker", "Git internals", "Bash",
+      "PowerShell", "pytest", "Jest", "Cargo", "pnpm/uv", "JSON/TOML config",
+      "CI log debugging", "LLM-as-judge evaluation",
+    ],
   },
   {
     company: "Outlier",
@@ -207,8 +193,8 @@ export default function Home() {
                   <div className="experience-copy">
                     <div className="experience-title"><div><h3>{experience.role}</h3><p>{experience.linkedin ? <a className="company-link" href={experience.linkedin} target="_blank" rel="noreferrer">{experience.company} <span aria-hidden="true">↗</span></a> : experience.company}</p></div>{experience.current && <span>Current</span>}</div>
                     <small>{experience.date} · {experience.location}</small>
-                    <p>{experience.description}</p>
-                    {experience.details && <ExperienceDetails details={experience.details} stack={experience.stack} />}
+                    {experience.description && <p>{experience.description}</p>}
+                    {experience.points && <ExperienceDetails points={experience.points} />}
                     <div className="experience-skills">{experience.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
                   </div>
                 </RevealItem>
