@@ -3,8 +3,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdmin } from "@/lib/auth";
 import { listExperiences } from "@/lib/experiences";
-import { createExperience, deleteExperience, updateExperience } from "./actions";
+import { listProjectRows } from "@/lib/projects";
+import {
+  createExperience,
+  createProject,
+  deleteExperience,
+  deleteProject,
+  updateExperience,
+  updateProject,
+} from "./actions";
 import { ExperienceForm } from "./ExperienceForm";
+import { ProjectForm } from "./ProjectForm";
 import { SignOut } from "./SignOut";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -15,14 +24,14 @@ export default async function AdminPage() {
   const admin = await getAdmin();
   if (!admin) redirect("/admin/login");
 
-  const roles = await listExperiences();
+  const [roles, projectRows] = await Promise.all([listExperiences(), listProjectRows()]);
 
   return (
     <main className="admin-shell">
       <header className="admin-head">
         <div>
           <span className="eyebrow">Portfolio admin</span>
-          <h1>Experience</h1>
+          <h1>Content</h1>
           <p className="admin-note">
             Signed in as {admin.email}. Changes appear on the live site immediately.
           </p>
@@ -57,6 +66,38 @@ export default async function AdminPage() {
               <form action={deleteExperience} className="admin-delete">
                 <input type="hidden" name="id" value={role.id} />
                 <button type="submit">Delete this role</button>
+              </form>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section className="admin-section">
+        <h2>Add a project</h2>
+        <details className="admin-item">
+          <summary><strong>New project</strong><span>Opens the full form</span></summary>
+          <div className="admin-form-wrap">
+            <ProjectForm action={createProject} submitLabel="Add project" />
+          </div>
+        </details>
+      </section>
+
+      <section className="admin-section">
+        <h2>Current projects <i>{projectRows.length}</i></h2>
+        {projectRows.length === 0 && <p className="admin-note">No projects yet.</p>}
+        <div className="admin-list">
+          {projectRows.map((project) => (
+            <details key={project.id} className="admin-item">
+              <summary>
+                <strong>{project.shortTitle || project.title}</strong>
+                <span>/projects/{project.slug}</span>
+              </summary>
+              <div className="admin-form-wrap">
+                <ProjectForm action={updateProject} submitLabel="Save changes" project={project} />
+              </div>
+              <form action={deleteProject} className="admin-delete">
+                <input type="hidden" name="id" value={project.id} />
+                <button type="submit">Delete this project</button>
               </form>
             </details>
           ))}

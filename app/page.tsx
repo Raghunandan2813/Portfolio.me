@@ -15,14 +15,15 @@ import { ProfileAvatar } from "./components/ProfileAvatar";
 import { ProjectMedia } from "./components/ProjectMedia";
 import { Reveal, RevealGroup, RevealItem } from "./components/Reveal";
 import { VisitorCounter } from "./components/VisitorCounter";
-import { projects, skillGroups } from "./data/portfolio";
+import { skillGroups } from "./data/portfolio";
 import { listExperiences } from "@/lib/experiences";
+import { listProjects } from "@/lib/projects";
 import { CONTACT_EMAIL, GITHUB_PROFILE_URL, LINKEDIN_URL } from "@/lib/site";
 
 const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
 export default async function Home() {
-  const experiences = await listExperiences();
+  const [experiences, projects] = await Promise.all([listExperiences(), listProjects()]);
   return (
     <main className="social-app" id="top">
       <Reveal as="section" className="profile-card page-shell" from="scale" amount={0.05}>

@@ -51,6 +51,47 @@ export const experiences = pgTable("experiences", {
 export type ExperienceRow = typeof experiences.$inferSelect;
 export type NewExperience = typeof experiences.$inferInsert;
 
+/**
+ * Case-study projects, previously the `projects` array in app/data/portfolio.ts.
+ *
+ * `slug` is unique because it addresses /projects/[slug]; changing it changes
+ * the public URL, so the admin form warns rather than silently breaking links.
+ *
+ * `highlights` is jsonb for the same reason as `points` above: always read and
+ * written whole, never queried across rows.
+ */
+export const projectsTable = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  shortTitle: text("short_title").notNull().default(""),
+  category: text("category").notNull().default(""),
+  tagline: text("tagline").notNull().default(""),
+  summary: text("summary").notNull().default(""),
+  problem: text("problem").notNull().default(""),
+  solution: text("solution").notNull().default(""),
+  highlights: jsonb("highlights")
+    .$type<{ title: string; mechanism: string; use?: string }[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+  stack: jsonb("stack").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  /** Null hides the "Open live product" call to action. */
+  liveUrl: text("live_url"),
+  githubUrl: text("github_url").notNull().default(""),
+  /** Path under /public, e.g. "/videos/mindly-demo.mp4". Null hides the player. */
+  demoVideo: text("demo_video"),
+  demoPoster: text("demo_poster"),
+  demoLength: text("demo_length"),
+  /** Drives the card's colour treatment: violet | blue | orange. */
+  accent: text("accent").notNull().default("violet"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type ProjectRow = typeof projectsTable.$inferSelect;
+
 export const siteStats = pgTable("site_stats", {
   id: text("id").primaryKey(),
   totalViews: integer("total_views").notNull().default(0),

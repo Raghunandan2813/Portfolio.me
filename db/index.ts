@@ -35,8 +35,18 @@ function createDb() {
   const client = postgres(connectionString, {
     // Required for PgBouncer transaction mode.
     prepare: false,
-    // One connection per serverless instance; the pooler does the real pooling.
-    max: 1,
+    /**
+     * Ceiling, not a preallocation — postgres-js opens connections lazily, so a
+     * serverless invocation doing one query still holds one connection.
+     *
+     * This was `max: 1` on the reasoning that the pooler does the real pooling.
+     * That is true at runtime but breaks `next build`: static generation
+     * renders many pages concurrently in a single process, and a page doing
+     * `Promise.all([listExperiences(), listProjects()])` then waits on a pool
+     * of one. Rendering stalled past Next's 60s per-page limit and the build
+     * failed with query_canceled (57014).
+     */
+    max: 5,
     idle_timeout: 20,
     connect_timeout: 10,
   });

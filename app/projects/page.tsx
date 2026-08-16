@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ProjectBento } from "../components/ProjectBento";
 import { ProjectsHero } from "../components/ProjectsHero";
 import { Reveal } from "../components/Reveal";
-import { projects } from "../data/portfolio";
+import { listProjects } from "@/lib/projects";
 import { CONTACT_EMAIL } from "@/lib/site";
 
 const description =
@@ -29,7 +29,8 @@ const stats = [
 
 const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await listProjects();
   return (
     <main className="projects-page page-shell">
       <ProjectsHero projects={projects} stats={stats} resumePath={RESUME_PATH} />

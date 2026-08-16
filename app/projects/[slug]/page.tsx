@@ -3,18 +3,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProjectMedia } from "../../components/ProjectMedia";
 import { Reveal } from "../../components/Reveal";
-import { projects } from "../../data/portfolio";
+import { getProject, listProjects } from "@/lib/projects";
 import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 
 type ProjectPageProps = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const projects = await listProjects();
   return projects.map((project) => ({ slug: project.slug }));
 }
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = projects.find((item) => item.slug === slug);
+  const project = await getProject(slug);
   if (!project) return {};
 
   const url = `/projects/${project.slug}`;
@@ -34,10 +35,12 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = projects.find((item) => item.slug === slug);
+  const project = await getProject(slug);
   if (!project) notFound();
+  // The "next case study" link needs the ordered list, not just this row.
+  const projects = await listProjects();
   const currentIndex = projects.findIndex((item) => item.slug === slug);
-  const nextProject = projects[(currentIndex + 1) % projects.length];
+  const nextProject = projects[(currentIndex + 1) % projects.length] ?? project;
 
   const projectSchema = {
     "@context": "https://schema.org",

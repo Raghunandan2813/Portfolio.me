@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { experiences } from "@/db/schema";
+import { experiences, projectsTable } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { fetchBrandLogo } from "@/lib/brand";
 
@@ -85,6 +85,119 @@ export async function deleteExperience(formData: FormData) {
   await db.delete(experiences).where(eq(experiences.id, id));
   revalidatePath("/");
   revalidatePath("/admin");
+}
+
+/* --- Projects ------------------------------------------------------------- */
+
+/** URL-safe slug. Also applied to whatever is typed, so a title can be pasted. */
+function toSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Highlights are entered as one block per line:
+ *   Title | Mechanism | Use
+ * `Use` is optional, matching the type — a project can ship the mechanism
+ * first and gain the rationale later.
+ */
+function toHighlights(value: FormDataEntryValue | null) {
+  return String(value || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [title, mechanism, use] = line.split("|").map((part) => part.trim());
+      return { title: title || "", mechanism: mechanism || "", use: use || undefined };
+    })
+    .filter((highlight) => highlight.title);
+}
+
+function readProjectForm(formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  if (!title) throw new Error("Title is required");
+
+  const rawSlug = String(formData.get("slug") || "").trim();
+  const slug = toSlug(rawSlug || title);
+  if (!slug) throw new Error("Slug is required");
+
+  const accent = String(formData.get("accent") || "violet");
+
+  return {
+    slug,
+    title,
+    shortTitle: String(formData.get("shortTitle") || "").trim() || title,
+    category: String(formData.get("category") || "").trim(),
+    tagline: String(formData.get("tagline") || "").trim(),
+    summary: String(formData.get("summary") || "").trim(),
+    problem: String(formData.get("problem") || "").trim(),
+    solution: String(formData.get("solution") || "").trim(),
+    highlights: toHighlights(formData.get("highlights")),
+    stack: toList(formData.get("stack")),
+    liveUrl: String(formData.get("liveUrl") || "").trim() || null,
+    githubUrl: String(formData.get("githubUrl") || "").trim(),
+    demoVideo: String(formData.get("demoVideo") || "").trim() || null,
+    demoPoster: String(formData.get("demoPoster") || "").trim() || null,
+    demoLength: String(formData.get("demoLength") || "").trim() || null,
+    accent: ["violet", "blue", "orange"].includes(accent) ? accent : "violet",
+    sortOrder: Number(formData.get("sortOrder") || 0) || 0,
+  };
+}
+
+/** Revalidates every route a project appears on. */
+function revalidateProject(slug: string, previousSlug?: string) {
+  revalidatePath("/");
+  revalidatePath("/projects");
+  revalidatePath(`/projects/${slug}`);
+  // A renamed project leaves its old URL cached; clear that too.
+  if (previousSlug && previousSlug !== slug) revalidatePath(`/projects/${previousSlug}`);
+  revalidatePath("/admin");
+}
+
+export async function createProject(formData: FormData) {
+  await requireAdmin();
+  const values = readProjectForm(formData);
+  const db = await getDb();
+  await db.insert(projectsTable).values(values);
+  revalidateProject(values.slug);
+}
+
+export async function updateProject(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) throw new Error("Invalid id");
+
+  const values = readProjectForm(formData);
+  const db = await getDb();
+  // Read the old slug first: changing it changes the public URL, and the stale
+  // path needs clearing from the cache.
+  const [existing] = await db
+    .select({ slug: projectsTable.slug })
+    .from(projectsTable)
+    .where(eq(projectsTable.id, id))
+    .limit(1);
+
+  await db.update(projectsTable).set(values).where(eq(projectsTable.id, id));
+  revalidateProject(values.slug, existing?.slug);
+}
+
+export async function deleteProject(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) throw new Error("Invalid id");
+
+  const db = await getDb();
+  const [existing] = await db
+    .select({ slug: projectsTable.slug })
+    .from(projectsTable)
+    .where(eq(projectsTable.id, id))
+    .limit(1);
+
+  await db.delete(projectsTable).where(eq(projectsTable.id, id));
+  revalidateProject(existing?.slug ?? "");
 }
 
 /**

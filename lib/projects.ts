@@ -1,0 +1,84 @@
+import { asc, eq } from "drizzle-orm";
+import { getDb } from "@/db";
+import { projectsTable, type ProjectRow } from "@/db/schema";
+import type { Project } from "@/app/data/portfolio";
+import { projects as fallbackProjects } from "@/app/data/portfolio";
+
+/**
+ * Projects, read from Postgres.
+ *
+ * The `Project` shape is reused verbatim from app/data/portfolio.ts so every
+ * existing component keeps working untouched; only the source of the data
+ * changed.
+ *
+ * If the database is unreachable the hardcoded array is served instead. For
+ * experiences an empty section is an acceptable degradation, but the project
+ * pages are the substance of the portfolio — blanking them would be worse than
+ * showing content that is merely out of date.
+ */
+
+function toProject(row: ProjectRow): Project {
+  return {
+    slug: row.slug,
+    title: row.title,
+    shortTitle: row.shortTitle || row.title,
+    category: row.category,
+    tagline: row.tagline,
+    summary: row.summary,
+    problem: row.problem,
+    solution: row.solution,
+    highlights: Array.isArray(row.highlights) ? row.highlights : [],
+    stack: Array.isArray(row.stack) ? row.stack : [],
+    liveUrl: row.liveUrl,
+    githubUrl: row.githubUrl,
+    demoVideo: row.demoVideo,
+    demoPoster: row.demoPoster,
+    demoLength: row.demoLength ?? undefined,
+    accent: (row.accent as Project["accent"]) || "violet",
+  };
+}
+
+export async function listProjects(): Promise<Project[]> {
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select()
+      .from(projectsTable)
+      .orderBy(asc(projectsTable.sortOrder), asc(projectsTable.id));
+    // An empty table on a fresh database should not blank the site.
+    if (rows.length === 0) return fallbackProjects;
+    return rows.map(toProject);
+  } catch (error) {
+    console.error("Failed to load projects, serving bundled copy", error);
+    return fallbackProjects;
+  }
+}
+
+export async function getProject(slug: string): Promise<Project | null> {
+  try {
+    const db = await getDb();
+    const [row] = await db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.slug, slug))
+      .limit(1);
+    if (row) return toProject(row);
+  } catch (error) {
+    console.error("Failed to load project, falling back", error);
+  }
+  return fallbackProjects.find((project) => project.slug === slug) ?? null;
+}
+
+/** Rows for the admin list, including the id the forms need. */
+export async function listProjectRows(): Promise<ProjectRow[]> {
+  try {
+    const db = await getDb();
+    return await db
+      .select()
+      .from(projectsTable)
+      .orderBy(asc(projectsTable.sortOrder), asc(projectsTable.id));
+  } catch (error) {
+    console.error("Failed to load project rows", error);
+    return [];
+  }
+}
