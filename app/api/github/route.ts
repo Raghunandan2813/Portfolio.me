@@ -56,9 +56,10 @@ export async function GET() {
     { repos: result.value, stale: !result.fresh },
     {
       headers: {
-        // Browser-level caching on top of the D1 cache. `stale-while-revalidate`
-        // keeps the feed instant on repeat views.
-        "Cache-Control": "public, max-age=600, stale-while-revalidate=86400",
+        // Short browser cache: the server-side cache already absorbs upstream
+        // calls, so a long stale-while-revalidate only delays fresh data
+        // reaching the visitor.
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=600",
       },
     },
   );

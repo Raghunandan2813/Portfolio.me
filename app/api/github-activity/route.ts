@@ -179,7 +179,10 @@ export async function GET() {
     },
     {
       headers: {
-        "Cache-Control": "public, max-age=600, stale-while-revalidate=86400",
+        // Short browser cache: the server-side cache already absorbs upstream
+        // calls, so a long stale-while-revalidate only delays fresh data
+        // reaching the visitor.
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=600",
       },
     },
   );
