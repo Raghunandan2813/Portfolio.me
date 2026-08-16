@@ -194,6 +194,18 @@
    ========================================================================= */
 
 * { box-sizing: border-box; }
+
+/* Belt-and-braces against sideways scrolling on phones. The layout bugs that
+   caused it are fixed at source, but reveal animations translate elements
+   horizontally on their way in, and a transform mid-flight would otherwise
+   widen the document for the duration of the animation.
+
+   `hidden` rather than `clip`: on the root element `overflow` propagates to the
+   viewport, so the html box itself stays visible and `position: fixed`
+   descendants (the resume chat launcher) are unaffected. `clip` instead
+   establishes a clip context that *does* capture fixed descendants, which is
+   what previously pinned the launcher to the top of the page. */
+html { overflow-x: hidden; }
 html { scroll-behavior: smooth; scroll-padding-top: 86px; }
 body {
   /* Positioning context for the document-spanning .sun-shine overlay. */
@@ -519,6 +531,17 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .social-layout { display: grid; grid-template-columns: minmax(0, 820px) minmax(0, 330px); align-items: start; gap: 22px; margin-top: 22px; }
 .feed-column { display: grid; gap: 18px; min-width: 0; }
 .side-column { position: sticky; top: 88px; display: grid; gap: 14px; min-width: 0; }
+
+/* A grid item's automatic minimum size is `auto`, meaning it refuses to shrink
+   below its content's min-content width. One wide child — the 53-column
+   contribution heatmap, a video — therefore stretches its whole track past the
+   viewport and forces the entire page to scroll sideways on a phone.
+   `min-width: 0` lets the track shrink so inner scrollers (.heatmap-scroll)
+   handle their own overflow instead.
+
+   This must match every child, not a list of classes: <Reveal> wraps sections
+   in an unnamed motion div, and that wrapper is the real grid item. */
+.social-layout > *, .feed-column > *, .side-column > *, .work-bento > * { min-width: 0; }
 .feed-card, .side-card, .contribution-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); }
 .post-author { height: 72px; display: flex; align-items: center; gap: 11px; padding: 0 22px; border-bottom: 1px solid var(--line-soft); }
 .mini-avatar { width: 42px; height: 42px; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: linear-gradient(140deg, var(--indigo), var(--violet)); color: #fff; font-size: 12px; font-weight: 900; }
@@ -1221,6 +1244,22 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
   /* Long unbroken tokens (URLs, identifiers) are a classic overflow source. */
   .post-copy p, .bento-project-copy p, .experience-copy > p,
   .highlight-row p, .side-card > p, .profile-headline { overflow-wrap: anywhere; }
+}
+
+/* Reveal animations slide cards in horizontally. Motion resolves that offset
+   once, before the viewport width is knowable during SSR, so a card still
+   below the fold sits ~38px past the right edge and holds the document wider
+   than the screen — which is what makes a phone shrink the whole page to fit.
+   Clip the travel on the containers that go full-width below 1040px.
+
+   `clip` not `hidden`: `hidden` would make these scroll containers, which
+   breaks the sticky side column. `overflow-clip-margin` keeps card shadows
+   visible; browsers without it simply clip flush, which is still correct. */
+@media (max-width: 1040px) {
+  .side-column, .feed-column, .case-story {
+    overflow-x: clip;
+    overflow-clip-margin: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -66,6 +66,10 @@ export function Reveal({
     return <Tag className={className} id={id}>{children}</Tag>;
   }
 
+  // Note: `narrow` is false during SSR and corrects on hydration, but Motion
+  // only applies a variant on a state change — so elements still below the
+  // fold keep the desktop `x: ±38` until they scroll into view. The stylesheet
+  // clips that travel on narrow viewports rather than let it widen the page.
   const variants: Variants = {
     hidden: { opacity: 0, ...resolveOffset(from, narrow) },
     visible: {
