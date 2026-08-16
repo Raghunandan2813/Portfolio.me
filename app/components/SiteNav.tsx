@@ -5,13 +5,8 @@ export function SiteNav() {
   return (
     <header className="social-nav">
       <div className="nav-inner">
-        <Link className="nav-brand" href="/#top" aria-label="Raghunandan Kumar home">
-          <span></span>
-        </Link>
-        <Link className="nav-search" href="/#work" aria-label="Jump to my work">
-          <i aria-hidden="true">⌕</i>
-          <span></span>
-        </Link>
+        {/* Links are absolutely centred so the theme toggle's width cannot
+            pull them off-centre. */}
         <nav className="nav-links" aria-label="Primary navigation">
           <Link href="/#top"><b>⌂</b><span>Profile</span></Link>
           <Link href="/projects"><b>▦</b><span>Projects</span></Link>
@@ -19,8 +14,6 @@ export function SiteNav() {
           <Link href="/#stack"><b>✦</b><span>Stack</span></Link>
           <Link href="/#contact"><b>✉</b><span>Contact</span></Link>
         </nav>
-        {/* The resume download lives on the profile banner only, so there is a
-            single, unambiguous entry point for it. */}
         <ThemeToggle />
       </div>
     </header>

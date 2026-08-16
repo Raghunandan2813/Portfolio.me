@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 
 type ActivityDay = { date: string; count: number; level: number };
-type ActivityResponse = { days: ActivityDay[]; activeDays: number; totalEvents: number };
+type ActivityResponse = {
+  days: ActivityDay[];
+  activeDays: number;
+  totalContributions: number;
+};
 
 function fallbackDays() {
   const result: ActivityDay[] = [];
@@ -17,7 +21,11 @@ function fallbackDays() {
 }
 
 export function GithubActivity() {
-  const [activity, setActivity] = useState<ActivityResponse>({ days: fallbackDays(), activeDays: 0, totalEvents: 0 });
+  const [activity, setActivity] = useState<ActivityResponse>({
+    days: fallbackDays(),
+    activeDays: 0,
+    totalContributions: 0,
+  });
 
   useEffect(() => {
     fetch("/api/github-activity")
@@ -29,13 +37,35 @@ export function GithubActivity() {
   return (
     <div className="contribution-card">
       <div className="contribution-top">
-        <div><span className="eyebrow">Public GitHub signal</span><h3>Recent contribution rhythm</h3></div>
-        <div className="contribution-stats"><span><strong>{activity.activeDays}</strong> active days</span><span><strong>{activity.totalEvents}</strong> public events</span></div>
+        <div>
+          <span className="eyebrow">GitHub contribution</span>
+          <h3>Recent contribution rhythm</h3>
+        </div>
+        <div className="contribution-stats">
+          <span><strong>{activity.activeDays}</strong> active days</span>
+          <span><strong>{activity.totalContributions}</strong> contributions</span>
+        </div>
       </div>
-      <div className="heatmap" role="img" aria-label={`GitHub activity over the last 12 weeks: ${activity.totalEvents} public events across ${activity.activeDays} active days`}>
-        {activity.days.map((day) => <i className={`level-${day.level}`} title={`${day.date}: ${day.count} public events`} key={day.date} />)}
+      <div
+        className="heatmap"
+        role="img"
+        aria-label={`GitHub contributions over the last 12 weeks: ${activity.totalContributions} contributions across ${activity.activeDays} active days`}
+      >
+        {activity.days.map((day) => (
+          <i
+            className={`level-${day.level}`}
+            title={`${day.date}: ${day.count} contributions`}
+            key={day.date}
+          />
+        ))}
       </div>
-      <div className="heatmap-legend"><span>12 weeks ago</span><span>Public activity only</span><span>Less <i /><i className="level-1" /><i className="level-2" /><i className="level-3" /><i className="level-4" /> More</span></div>
+      <div className="heatmap-legend">
+        <span>12 weeks ago</span>
+        <span>
+          Less <i /><i className="level-1" /><i className="level-2" />
+          <i className="level-3" /><i className="level-4" /> More
+        </span>
+      </div>
     </div>
   );
 }

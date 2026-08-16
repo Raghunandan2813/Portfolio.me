@@ -34,3 +34,42 @@ export async function githubFetch(path: string): Promise<Response> {
 
   return response;
 }
+
+/**
+ * Calls the GitHub GraphQL API.
+ *
+ * Required for contribution totals: the REST events endpoint exposes public
+ * activity only, whereas `viewer.contributionsCollection` returns the real
+ * calendar including private contributions — but only when the token belongs
+ * to the account being queried and carries the `read:user` scope.
+ */
+export async function githubGraphQL<T>(
+  query: string,
+  variables: Record<string, unknown>,
+): Promise<T> {
+  const token = readEnv("GITHUB_TOKEN");
+  if (!token) throw new Error("GITHUB_TOKEN is required for the GraphQL API");
+
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "User-Agent": "Raghunandan-Portfolio",
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`GitHub GraphQL failed: ${response.status}`);
+  }
+
+  const payload = (await response.json()) as { data?: T; errors?: { message: string }[] };
+  if (payload.errors?.length) {
+    // A missing read:user scope surfaces here rather than as a non-200.
+    throw new Error(`GitHub GraphQL error: ${payload.errors[0].message}`);
+  }
+  if (!payload.data) throw new Error("GitHub GraphQL returned no data");
+
+  return payload.data;
+}
