@@ -71,8 +71,17 @@ const experiences: Experience[] = [
     date: "June 2026 - Present",
     location: "Remote · San Francisco, USA",
     current: true,
-    description: "Evaluated LLM responses for quality, accuracy, and safety; trained models with structured feedback; supported annotation datasets; and tested prompts across edge cases.",
-    skills: ["LLM evaluation", "Prompt testing", "Data annotation"],
+    points: [
+      "Evaluated and rated outputs from large language models (LLMs) based on quality, accuracy, and safety guidelines.",
+      "Trained AI models through structured feedback, improving reasoning, coherence, and response quality.",
+      "Performed data annotation and labelling to support AI model training and fine-tuning datasets.",
+      "Wrote and tested prompts to assess model behaviour and edge-case handling across scenarios.",
+    ],
+    skills: [
+      "Large Language Models (LLMs)", "Human-in-the-Loop AI Training", "Prompt Engineering",
+      "Model Evaluation", "Data Annotation and Labeling", "Fine-Tuning Dataset Preparation",
+      "AI Safety Alignment", "Response Quality Assessment", "Edge-Case Testing",
+    ],
   },
   {
     company: "TurboML",
@@ -81,8 +90,17 @@ const experiences: Experience[] = [
     role: "Software Engineering Intern (AI)",
     date: "April 2025 - May 2026",
     location: "Remote · California, USA",
-    description: "Built a Redis-based agentic reminder system, multi-tool routing for Swiggy, Blinkit, and Google APIs, plus a runtime-configurable WhatsApp Business command layer.",
-    skills: ["Agent systems", "Redis", "WhatsApp API"],
+    points: [
+      "Engineered a Redis-backed scheduling engine using Sorted Sets and a purpose-built daemon, achieving sub-second reminder execution for workflows limited to a 24-hour window.",
+      "Unified Swiggy food delivery and dining, Blinkit grocery services, and Google APIs within an AI-agent tool layer that supports contextual tool selection and user-driven routing.",
+      "Developed a WhatsApp Business bot control interface with /help, /reset, and /new commands, while enabling environment-based runtime configuration to simplify deployment and initialization.",
+      "Enhanced the WhatsApp agent pipeline with Azure Blob Storage–based file handling and support for managing message reactions.",
+    ],
+    skills: [
+      "Redis (Sorted Sets)", "WhatsApp Business API", "Azure Blob Storage", "Google APIs",
+      "Swiggy and Blinkit APIs", "RESTful APIs", "Agentic AI Tool Calling",
+      "Background Daemons", "Environment-Based Configuration",
+    ],
   },
 ];
 

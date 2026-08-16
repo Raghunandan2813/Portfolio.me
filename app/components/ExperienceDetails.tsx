@@ -19,8 +19,10 @@ export function ExperienceDetails({ points }: { points: string[] }) {
     <div className="exp-details">
       <ul className="exp-bullets">
         <li>{first}</li>
-        {/* Unmounted rather than CSS-hidden when closed, so screen readers and
-            page-text extraction do not pick up the folded copy. */}
+        {/* Unmounted rather than CSS-hidden when closed, so the folded copy
+            stays out of the DOM and the accessibility tree. It is still
+            serialised into the RSC payload as props, so this is about how the
+            page reads, not about withholding the text. */}
         {open && (
           <li className="exp-bullets-more" id={regionId}>
             <ul>
