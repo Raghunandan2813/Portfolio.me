@@ -1,12 +1,55 @@
 import { sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+
+/**
+ * Roles shown in the experience feed.
+ *
+ * Previously a hardcoded array in `app/page.tsx`; moved here so entries can be
+ * added from the admin dashboard without a redeploy.
+ *
+ * `points` and `skills` are jsonb string arrays rather than separate tables:
+ * they are always read and written whole, never queried across rows, so
+ * normalising them would add joins and buy nothing.
+ *
+ * `sortOrder` is explicit rather than ordering by date, because the dates are
+ * free text ("July 2026 - Present") and two current roles have no meaningful
+ * chronological order between them.
+ */
+export const experiences = pgTable("experiences", {
+  id: serial("id").primaryKey(),
+  company: text("company").notNull(),
+  role: text("role").notNull(),
+  /** Fallback initial, used when no logo has been fetched. */
+  monogram: text("monogram").notNull().default(""),
+  /** Public URL in Supabase Storage. Null renders the monogram instead. */
+  logoUrl: text("logo_url"),
+  /** Company page. Null renders the company name as plain text. */
+  linkedinUrl: text("linkedin_url"),
+  /** Free text, e.g. "July 2026 - Present". */
+  date: text("date").notNull(),
+  location: text("location").notNull().default(""),
+  current: boolean("current").notNull().default(false),
+  /** Optional single-paragraph summary. */
+  description: text("description"),
+  points: jsonb("points").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  skills: jsonb("skills").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type ExperienceRow = typeof experiences.$inferSelect;
+export type NewExperience = typeof experiences.$inferInsert;
 
 export const siteStats = pgTable("site_stats", {
   id: text("id").primaryKey(),

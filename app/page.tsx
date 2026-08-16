@@ -16,95 +16,13 @@ import { ProjectMedia } from "./components/ProjectMedia";
 import { Reveal, RevealGroup, RevealItem } from "./components/Reveal";
 import { VisitorCounter } from "./components/VisitorCounter";
 import { projects, skillGroups } from "./data/portfolio";
+import { listExperiences } from "@/lib/experiences";
 import { CONTACT_EMAIL, GITHUB_PROFILE_URL, LINKEDIN_URL } from "@/lib/site";
 
 const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
-type Experience = {
-  company: string;
-  /** Fallback initial, shown when no logo file is present. */
-  monogram: string;
-  /** Official mark, taken from each company's own site. */
-  logo?: string;
-  /** Company page. Renders the company name as a link when set. */
-  linkedin?: string;
-  role: string;
-  date: string;
-  location: string;
-  current?: boolean;
-  /** Single-paragraph summary. Omitted where `points` carries the detail. */
-  description?: string;
-  /** Bulleted detail. All but the first bullet fold behind a toggle. */
-  points?: string[];
-  skills: string[];
-};
-
-const experiences: Experience[] = [
-  {
-    company: "Snorkel AI",
-    monogram: "S",
-    logo: "/logos/snorkel-ai.png",
-    linkedin: "https://www.linkedin.com/company/snorkel-ai/",
-    role: "AI Expert",
-    date: "July 2026 - Present",
-    location: "Remote",
-    current: true,
-    points: [
-      "Rebuilt 7+ returned tasks from real merged open-source PRs across Python, TypeScript and Rust repos, taking each through a multi-stage automated review gate to acceptance.",
-      "Runs oracle, base, forgery and idempotence scenarios directly from the packed submission zip, reproducing the grading platform's real environment. Caught defects that the automated gates scored as passing.",
-      "An agent could score a perfect 1.0 by printing the graded test IDs without running a single test. Fixed with per-run secret tokens injected into test names at verify time, making the pass signal impossible to fake.",
-      "The oracle solution was missing 13 of the PR's own test files, leaving repository tests failing while the reward still showed 1.0. Traced it to one root cause and restored full PR integrity with an automated audit.",
-      "Reviewed other contributors' tasks and proved each finding in a container — including using git forensics (loose objects, missing remote, commit metadata) to show a shipped repo was a fresh git init with a fabricated base commit SHA.",
-    ],
-    skills: [
-      "Python", "TypeScript", "Rust", "Docker", "Git internals", "Bash",
-      "PowerShell", "pytest", "Jest", "Cargo", "pnpm/uv", "JSON/TOML config",
-      "CI log debugging", "LLM-as-judge evaluation",
-    ],
-  },
-  {
-    company: "Outlier",
-    monogram: "O",
-    logo: "/logos/outlier.svg",
-    linkedin: "https://www.linkedin.com/company/try-outlier/",
-    role: "AI Engineer and Trainer",
-    date: "June 2026 - Present",
-    location: "Remote · San Francisco, USA",
-    current: true,
-    points: [
-      "Evaluated and rated outputs from large language models (LLMs) based on quality, accuracy, and safety guidelines.",
-      "Trained AI models through structured feedback, improving reasoning, coherence, and response quality.",
-      "Performed data annotation and labelling to support AI model training and fine-tuning datasets.",
-      "Wrote and tested prompts to assess model behaviour and edge-case handling across scenarios.",
-    ],
-    skills: [
-      "Large Language Models (LLMs)", "Human-in-the-Loop AI Training", "Prompt Engineering",
-      "Model Evaluation", "Data Annotation and Labeling", "Fine-Tuning Dataset Preparation",
-      "AI Safety Alignment", "Response Quality Assessment", "Edge-Case Testing",
-    ],
-  },
-  {
-    company: "TurboML",
-    monogram: "T",
-    logo: "/logos/turboml.png",
-    role: "Software Engineering Intern (AI)",
-    date: "April 2025 - May 2026",
-    location: "Remote · California, USA",
-    points: [
-      "Engineered a Redis-backed scheduling engine using Sorted Sets and a purpose-built daemon, achieving sub-second reminder execution for workflows limited to a 24-hour window.",
-      "Unified Swiggy food delivery and dining, Blinkit grocery services, and Google APIs within an AI-agent tool layer that supports contextual tool selection and user-driven routing.",
-      "Developed a WhatsApp Business bot control interface with /help, /reset, and /new commands, while enabling environment-based runtime configuration to simplify deployment and initialization.",
-      "Enhanced the WhatsApp agent pipeline with Azure Blob Storage–based file handling and support for managing message reactions.",
-    ],
-    skills: [
-      "Redis (Sorted Sets)", "WhatsApp Business API", "Azure Blob Storage", "Google APIs",
-      "Swiggy and Blinkit APIs", "RESTful APIs", "Agentic AI Tool Calling",
-      "Background Daemons", "Environment-Based Configuration",
-    ],
-  },
-];
-
-export default function Home() {
+export default async function Home() {
+  const experiences = await listExperiences();
   return (
     <main className="social-app" id="top">
       <Reveal as="section" className="profile-card page-shell" from="scale" amount={0.05}>
@@ -202,11 +120,18 @@ export default function Home() {
             <div className="feed-heading compact-heading"><div><span className="eyebrow">Experience</span><h2>Where I have applied the work</h2></div></div>
             <RevealGroup className="experience-list" stagger={0.09}>
               {experiences.map((experience) => (
-                <RevealItem key={experience.company} from="right" as="article">
+                <RevealItem key={experience.id} from="right" as="article">
                   <div className={`company-logo ${experience.logo ? "has-mark" : ""} ${experience.current ? "current" : ""}`}>
-                    {experience.logo
-                      ? <Image src={experience.logo} alt={`${experience.company} logo`} width={50} height={50} />
-                      : experience.monogram}
+                    {/* Plain img rather than next/image: logo URLs are entered
+                        at runtime and can point at Supabase Storage or the
+                        company's own CDN, so the host cannot be added to
+                        remotePatterns ahead of the build. */}
+                    {experience.logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={experience.logo} alt={`${experience.company} logo`} width={50} height={50} loading="lazy" />
+                    ) : (
+                      experience.monogram
+                    )}
                   </div>
                   <div className="experience-copy">
                     <div className="experience-title"><div><h3>{experience.role}</h3><p>{experience.linkedin ? <a className="company-link" href={experience.linkedin} target="_blank" rel="noreferrer">{experience.company} <span aria-hidden="true">↗</span></a> : experience.company}</p></div>{experience.current && <span>Current</span>}</div>
