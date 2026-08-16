@@ -1095,10 +1095,28 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .case-story article > span { color: var(--primary); font-size: 8px; font-weight: 850; text-transform: uppercase; letter-spacing: .1em; }
 .case-story h2 { margin: 10px 0 16px; font-size: 29px; letter-spacing: -.04em; }
 .case-story p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
-.highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.highlight-grid article { min-height: 150px; padding: 23px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-2); }
-.highlight-grid span { color: var(--primary); font-family: ui-monospace, monospace; font-size: 9px; }
-.highlight-grid p { margin: 22px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.highlight-grid article {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 26px 24px; border: 1px solid var(--line); border-radius: 15px;
+  background: var(--surface-2);
+  transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.highlight-grid article:hover { border-color: color-mix(in srgb, var(--primary) 50%, var(--line)); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.highlight-grid header { display: flex; align-items: baseline; gap: 11px; }
+.highlight-grid header span { flex: 0 0 auto; color: var(--primary); font-family: ui-monospace, monospace; font-size: 11px; font-weight: 700; }
+.highlight-grid h3 { margin: 0; font-size: 16px; line-height: 1.3; letter-spacing: -.02em; }
+/* Label column keeps Mechanism and Use scannable without extra chrome. */
+.highlight-row { display: grid; grid-template-columns: 78px 1fr; gap: 12px; align-items: start; }
+.highlight-row b {
+  padding-top: 2px; color: var(--soft); font-size: 8px; font-weight: 850;
+  text-transform: uppercase; letter-spacing: .11em;
+}
+.highlight-row p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.highlight-row:first-of-type p { color: var(--ink); }
+@media (max-width: 860px) {
+  .highlight-row { grid-template-columns: 1fr; gap: 5px; }
+}
 .case-stack { display: grid; grid-template-columns: 1fr 1.2fr; align-items: center; gap: 50px; margin-top: 18px; padding: 45px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); color: var(--panel-ink); }
 .case-stack h2 { margin: 8px 0 0; font-size: 34px; letter-spacing: -.045em; }
 .case-stack > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }

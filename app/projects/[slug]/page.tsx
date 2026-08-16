@@ -101,7 +101,26 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
         <Reveal as="section" className="case-build">
           <div className="case-section-heading"><span>04</span><div><small>Engineering details</small><h2>What I built</h2></div></div>
-          <div className="highlight-grid">{project.highlights.map((highlight, index) => <article key={highlight}><span>0{index + 1}</span><p>{highlight}</p></article>)}</div>
+          <div className="highlight-grid">
+            {project.highlights.map((highlight, index) => (
+              <article key={highlight.title}>
+                <header>
+                  <span>0{index + 1}</span>
+                  <h3>{highlight.title}</h3>
+                </header>
+                <div className="highlight-row">
+                  <b>Mechanism</b>
+                  <p>{highlight.mechanism}</p>
+                </div>
+                {highlight.use && (
+                  <div className="highlight-row">
+                    <b>Use</b>
+                    <p>{highlight.use}</p>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
         </Reveal>
 
         <Reveal as="section" className="case-stack" from="scale">
