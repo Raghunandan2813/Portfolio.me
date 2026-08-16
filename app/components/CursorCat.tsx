@@ -38,10 +38,12 @@ export function CursorCat() {
     const body = bodyRef.current;
     if (!root || !body) return;
 
-    // No cursor to chase on touch devices, and no motion for users who ask
-    // not to have any.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+
+    // Touch devices have no hovering cursor, so the cat chases taps and drags
+    // instead. `pointermove` only fires mid-drag on touch, which is why
+    // `pointerdown` is also needed for a plain tap to register.
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
     // Start beside the banner action icons, as though it had been sitting
     // there all along. Falls back to the top-right if the banner is absent.
@@ -77,9 +79,18 @@ export function CursorCat() {
       pointerSeen = true;
     }
 
+    // On touch, hold the target after the finger lifts so the cat finishes its
+    // walk to where you tapped rather than freezing mid-stride.
+    function onPointerDown(event: PointerEvent) {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      pointerSeen = true;
+    }
+
     // Cursor gone: settle rather than chase the last known position forever.
+    // Not applied on touch, where "leaving" is just lifting a finger.
     function onPointerLeave() {
-      pointerSeen = false;
+      if (!isTouch) pointerSeen = false;
     }
 
     function step() {
@@ -149,12 +160,14 @@ export function CursorCat() {
     }
 
     window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
     document.addEventListener("pointerleave", onPointerLeave);
     frame = requestAnimationFrame(step);
 
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("pointerleave", onPointerLeave);
     };
   }, []);

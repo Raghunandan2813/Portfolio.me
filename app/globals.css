@@ -194,6 +194,7 @@
    ========================================================================= */
 
 * { box-sizing: border-box; }
+html { overflow-x: clip; }
 html { scroll-behavior: smooth; scroll-padding-top: 86px; }
 body {
   /* Positioning context for the document-spanning .sun-shine overlay. */
@@ -228,9 +229,6 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 .social-nav { position: sticky; z-index: 80; top: 0; height: 68px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(16px); }
 .nav-inner { position: relative; width: min(1180px, calc(100% - 32px)); height: 100%; margin-inline: auto; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 .nav-brand { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 10px; background: linear-gradient(140deg, var(--indigo), var(--violet)); color: #fff; font-size: 18px; font-weight: 900; letter-spacing: -.07em; }
-.nav-search { width: 210px; height: 42px; display: flex; align-items: center; gap: 9px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); color: var(--muted); font-size: 12px; }
-.nav-search i { font-size: 20px; font-style: normal; }
-.nav-search kbd { margin-left: auto; padding: 3px 5px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); font-size: 9px; }
 .nav-links { position: absolute; left: 50%; transform: translateX(-50%); height: 100%; display: flex; align-items: stretch; }
 .nav-links a { position: relative; min-width: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--muted); font-size: 10px; }
 .nav-links a b { font-size: 19px; font-weight: 500; line-height: 1; }
@@ -1112,6 +1110,72 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
   .experience-list > article { grid-template-columns: 42px 1fr; gap: 12px; padding: 22px 18px; }.company-logo { width: 42px; height: 42px; }.experience-title { display: block; }.experience-title > span { margin-top: 7px; }.stack-intro { padding: 30px 22px; }.stack-intro h2 { font-size: 31px; }.skill-matrix { grid-template-columns: 1fr; }.skill-matrix article, .skill-matrix article:last-child { grid-column: auto; border-right: 0; min-height: auto; }.testimonial-placeholder { margin-inline: 10px; padding: 28px 23px; }.testimonial-placeholder blockquote { font-size: 17px; }.contact-feed { padding: 20px 14px; }.form-row { grid-template-columns: 1fr; gap: 0; }.side-column { grid-template-columns: 1fr; }.resume-chat { right: 10px; bottom: 10px; }.chat-launcher { height: 44px; padding: 0 6px; }.chat-launcher b { display: none; }.chat-launcher span { width: 32px; height: 32px; }
   .social-footer { display: block; padding-bottom: 75px; }.social-footer nav { margin: 20px 0; flex-wrap: wrap; }.projects-page { padding-top: 24px; }.projects-hero { min-height: 480px; padding: 44px 24px; }.projects-hero h1 { font-size: 55px; }.projects-hero > div { flex-direction: column; align-items: stretch; }.archive-card { display: block; padding: 13px; }.archive-index { display: none; }.archive-card .product-frame { min-height: 220px; }.archive-card .mock-browser { min-height: 190px; }.archive-card .mock-body { min-height: 155px; }.archive-copy { padding: 18px 8px 12px; }.archive-copy h2 { font-size: 26px; }.projects-cta { padding: 45px 20px; }.projects-cta h2 { font-size: 36px; }
   .case-page { padding-top: 20px; }.case-hero { padding: 35px 23px; }.case-heading h1 { font-size: 49px; }.case-heading > p { font-size: 14px; }.case-actions { flex-direction: column; }.case-facts { grid-template-columns: 1fr; }.case-facts div { border-bottom: 1px solid var(--banner-hairline); }.case-demo, .case-build { padding: 24px 15px; }.case-section-heading h2 { font-size: 28px; }.case-demo .product-frame { min-height: 260px; padding: 13px; }.case-demo .mock-browser { min-height: 234px; }.case-demo .mock-body { min-height: 199px; }.case-demo .mock-canvas > strong { font-size: 18px; }.case-story { grid-template-columns: 1fr; }.case-story article { padding: 28px 22px; }.highlight-grid { grid-template-columns: 1fr; }.case-stack { grid-template-columns: 1fr; padding: 32px 22px; }.next-project { padding: 30px 22px; }.next-project strong { max-width: 80%; font-size: 21px; }
+}
+
+/* ---------------------------------------------------------------------------
+   MOBILE REFINEMENTS
+
+   Components added after the original responsive pass: the projects hero deck,
+   the bento tiles and the video cover had no rules below 1040px.
+   ------------------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+  /* Video cover: shrink the play target and caption so a half-width tile is
+     not dominated by chrome. */
+  .video-cover { padding: 14px; }
+  .video-play { width: 52px; height: 52px; top: 44%; }
+  .video-play svg { width: 21px; height: 21px; }
+  .video-caption b { font-size: 15px; }
+  .video-cta { margin-top: 7px; padding: 6px 10px; font-size: 9px; }
+  .video-badge { right: 10px; top: 10px; padding: 5px 8px; }
+
+  .bento-tile h2, .is-featured h2 { font-size: 21px; }
+  .bento-copy { padding: 14px 16px 18px; }
+  .bento-media { padding: 11px 11px 0; }
+}
+
+@media (max-width: 620px) {
+  /* Deck cards were a fixed 264px pinned at absolute offsets, so on a narrow
+     screen they ran past the viewport. Fluid width and reduced offsets instead
+     of scaling the whole deck, which blurred the text. */
+  .hero-deck { height: auto; transform: none; display: grid; gap: 12px; max-width: none; }
+  .deck-card { position: static; width: 100%; padding: 16px; }
+  .deck-1, .deck-2, .deck-3 { left: auto; top: auto; }
+  .deck-card strong { font-size: 16px; }
+
+  .projects-hero h1 { font-size: clamp(34px, 11vw, 46px); }
+  .hero-stats { gap: 18px; }
+  .hero-stats strong { font-size: 21px; }
+
+  .video-play { width: 46px; height: 46px; }
+  .video-play svg { width: 18px; height: 18px; }
+  .video-play::after { inset: -7px; }
+  .video-cover { padding: 12px; }
+  .video-caption b { font-size: 14px; }
+  .video-caption small { font-size: 9px; }
+
+  /* Case-study heading numbers and the highlight label column both crowd on
+     a phone. */
+  .case-section-heading { gap: 10px; }
+  .highlight-grid article { padding: 20px 17px; gap: 11px; }
+  .highlight-grid h3 { font-size: 15px; }
+
+  /* Four action icons plus the avatar overlap under ~380px. */
+  .profile-actions { gap: 5px; }
+  .icon-link { width: 32px; height: 32px; }
+  .icon-link svg { width: 14px; height: 14px; }
+
+  /* Smaller cat so it does not cover a third of a phone screen. */
+  .cursor-cat { width: 42px; height: 33px; }
+}
+
+@media (max-width: 400px) {
+  .profile-stats { grid-template-columns: 1fr 1fr; }
+  .banner-copy small { font-size: 18px; }
+  .banner-copy strong { font-size: 22px; }
+  .identity-row h1 { font-size: 21px; }
+  .nav-links a { min-width: 38px; }
+  .nav-links a b { font-size: 15px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
