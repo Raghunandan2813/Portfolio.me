@@ -51,6 +51,9 @@ export function BirdFlight() {
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // Reacting to an external transition by starting a timed animation is
+    // exactly what an effect is for; there is no render-time equivalent.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFlying(true);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setFlying(false), FLIGHT_MS);

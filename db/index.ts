@@ -20,7 +20,6 @@ import * as schema from "./schema";
 declare global {
   // Reused across hot reloads in development and warm invocations in
   // production, so we do not open a new pool on every request.
-  // eslint-disable-next-line no-var
   var __portfolioDb: ReturnType<typeof createDb> | undefined;
 }
 

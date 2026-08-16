@@ -2,16 +2,24 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { MoonIcon, SunIcon } from "./Icons";
+
+/** Never resubscribes; the value only differs between server and client. */
+const noopSubscribe = () => () => {};
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
   // The server cannot know the visitor's theme, so the icon is only correct
-  // after hydration. Rendering a neutral placeholder first avoids a mismatch.
-  useEffect(() => setMounted(true), []);
+  // after hydration. useSyncExternalStore gives `false` during SSR and `true`
+  // on the client without a setState-in-effect, which is both the React-blessed
+  // form and what keeps the hydration output identical.
+  const mounted = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 
   const isDark = resolvedTheme === "dark";
 

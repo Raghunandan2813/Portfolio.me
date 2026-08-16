@@ -46,7 +46,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     description: project.summary,
     applicationCategory: project.category,
     url: absoluteUrl(`/projects/${project.slug}`),
-    sameAs: [project.liveUrl, project.githubUrl],
+    sameAs: [project.liveUrl, project.githubUrl].filter(Boolean),
     author: { "@type": "Person", name: SITE_NAME, url: SITE_URL },
     keywords: project.stack.join(", "),
   };
@@ -83,7 +83,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
             <span className="eyebrow">{project.category} · Case study 0{currentIndex + 1}</span>
             <h1>{project.title}</h1>
             <p>{project.tagline}</p>
-            <div className="case-actions"><a className="primary-action" href={project.liveUrl} target="_blank" rel="noreferrer">Open live product ↗</a><a className="outline-action" href={project.githubUrl} target="_blank" rel="noreferrer">View source code</a></div>
+            <div className="case-actions">{project.liveUrl && <a className="primary-action" href={project.liveUrl} target="_blank" rel="noreferrer">Open live product ↗</a>}<a className={project.liveUrl ? "outline-action" : "primary-action"} href={project.githubUrl} target="_blank" rel="noreferrer">View source code</a></div>
           </div>
           <div className="case-facts"><div><span>Role</span><strong>Product &amp; engineering</strong></div><div><span>Focus</span><strong>{project.category}</strong></div><div><span>Delivery</span><strong>End-to-end build</strong></div></div>
         </Reveal>

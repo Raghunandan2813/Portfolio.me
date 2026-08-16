@@ -20,7 +20,8 @@ export type Project = {
   solution: string;
   highlights: Highlight[];
   stack: string[];
-  liveUrl: string;
+  /** null when there is no public deployment; the CTA is hidden. */
+  liveUrl: string | null;
   githubUrl: string;
   /** Path under /public, e.g. "/videos/mindly-demo.mp4". null hides the player. */
   demoVideo: string | null;
@@ -162,7 +163,9 @@ export const projects: Project[] = [
       },
     ],
     stack: ["Next.js", "WebContainer API", "Claude Sonnet", "TypeScript", "CodeMirror 6", "xterm.js", "Convex"],
-    liveUrl: "https://cognito.ai/",
+    // TODO: no reachable deployment (cognito.ai does not resolve). Set the
+    // real URL here and the 'Open live product' button returns automatically.
+    liveUrl: null,
     githubUrl: "https://github.com/raghunandan2813/cognito",
     demoVideo: null,
     accent: "orange",
