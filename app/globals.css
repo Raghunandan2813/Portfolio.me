@@ -106,85 +106,87 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Night: #2C3E50 surfaces, #ECF0F1 text */
+  /* Night: true black surfaces, the brand warmth carried by the accents */
   --brand-1: #ffc300;
   --brand-2: #ffd400;
   --brand-3: #ff8c00;
 
-  --bg: #1a252f;
-  --surface: #2c3e50;
-  --surface-2: #34495e;
-  --surface-3: #3e5871;
+  --bg: #000000;
+  --surface: #0f0f0f;
+  --surface-2: #161616;
+  --surface-3: #212121;
 
-  --ink: #ecf0f1;
-  --muted: #b7c4cc;
-  --soft: #8a9ba8;
+  --ink: #f4f4f4;
+  --muted: #a9a9a9;
+  --soft: #767676;
 
-  --line: #3e5871;
-  --line-soft: #34495e;
+  --line: #303030;
+  --line-soft: #212121;
 
-  --panel: #3e5871;
-  --panel-2: #4a6889;
-  --panel-ink: #ecf0f1;
-  --panel-muted: #b7c4cc;
-  --panel-soft: #8a9ba8;
-  --panel-line: rgba(236, 240, 241, 0.12);
+  /* Lifted above the page black so feature panels read as elevated */
+  --panel: #1b1b1b;
+  --panel-2: #272727;
+  --panel-ink: #f4f4f4;
+  --panel-muted: #b0b0b0;
+  --panel-soft: #7c7c7c;
+  --panel-line: rgba(255, 255, 255, 0.11);
+  --panel-accent: #ffd400;
 
-  /* Warm accents keep the brand identity readable on navy */
   --indigo: #ffc300;
   --indigo-strong: #ffd400;
-  --indigo-wash: #3a3218;
-  --teal: #ecf0f1;
-  --teal-wash: #33485c;
+  --indigo-wash: #2a2205;
+  --teal: #f4f4f4;
+  --teal-wash: #232323;
   --amber: #ffd400;
-  --amber-wash: #3d3517;
+  --amber-wash: #2e2607;
   --rose: #ff8c00;
-  --rose-wash: #3f2a10;
+  --rose-wash: #2e1d05;
   --violet: #ffb300;
-  --violet-wash: #3a3118;
+  --violet-wash: #2b2206;
   --emerald: #ffd400;
-  --emerald-wash: #3d3517;
+  --emerald-wash: #2e2607;
 
   --primary: #ffc300;
   --primary-strong: #ffd400;
-  --primary-wash: #3a3218;
-  --on-primary: #1a252f;
-  --on-accent: #1a252f;
+  --primary-wash: #2a2205;
+  --on-primary: #000000;
+  --on-accent: #000000;
 
-  --sky-1: #16202a;
-  --sky-2: #1a252f;
-  --sky-3: #22303c;
-  --sky-4: #2c3e50;
-  --ridge-far: #22303c;
-  --ridge-near: #131c24;
+  /* Night sky: black overhead, barely lifting toward the horizon */
+  --sky-1: #000000;
+  --sky-2: #060606;
+  --sky-3: #0e0e0e;
+  --sky-4: #171717;
+  --ridge-far: #0b0b0b;
+  --ridge-near: #000000;
 
-  --grad-1: #2c3e50;
-  --grad-2: #1a252f;
-  --grad-3: #34495e;
-  --grad-4: #22303c;
-  --banner-ink: #ecf0f1;
-  --banner-scrim-a: rgba(9, 14, 22, .62);
-  --banner-scrim-b: rgba(9, 14, 22, .32);
-  --banner-shadow: 0 2px 14px rgba(4, 10, 22, .6);
-  --banner-hairline: rgba(236, 240, 241, .34);
-  --banner-muted: rgba(236, 240, 241, .8);
+  --grad-1: #121212;
+  --grad-2: #000000;
+  --grad-3: #1e1e1e;
+  --grad-4: #0a0a0a;
+  --banner-ink: #f4f4f4;
+  --banner-scrim-a: rgba(0, 0, 0, .6);
+  --banner-scrim-b: rgba(0, 0, 0, .3);
+  --banner-shadow: 0 2px 14px rgba(0, 0, 0, .7);
+  --banner-hairline: rgba(244, 244, 244, .26);
+  --banner-muted: rgba(244, 244, 244, .76);
   --banner-accent: #ffd400;
-  --banner-hover: rgba(236, 240, 241, .14);
-  --panel-accent: #ffd400;
+  --banner-hover: rgba(244, 244, 244, .12);
 
-  --cat-ink: #ecf0f1;
+  --cat-ink: #f4f4f4;
   --cat-eye: #ffc300;
-  --bird-ink: #ecf0f1;
+  --bird-ink: #f4f4f4;
 
-  --hm-0: #22303c;
-  --hm-1: #4a5f73;
-  --hm-2: #7c8e9c;
-  --hm-3: #b9c6ce;
-  --hm-4: #ecf0f1;
+  /* Warm heatmap ramp reads better than green on pure black */
+  --hm-0: #1a1a1a;
+  --hm-1: #4a3a00;
+  --hm-2: #8a6c00;
+  --hm-3: #c9a000;
+  --hm-4: #ffd400;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 22px 60px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 22px 60px rgba(0, 0, 0, 0.85);
 }
 
 /* ============================================================================
