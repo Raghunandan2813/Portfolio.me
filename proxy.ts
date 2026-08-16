@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { AUTH_COOKIE_OPTIONS } from "@/lib/auth-cookies";
 
 /**
  * Keeps the Supabase session cookie fresh and gates /admin.
@@ -19,6 +20,9 @@ export async function proxy(request: NextRequest) {
   if (!url || !key) return response;
 
   const supabase = createServerClient(url, key, {
+    // Must match lib/auth.ts exactly; a cookie written with one set of
+    // attributes is not reliably cleared with another.
+    cookieOptions: AUTH_COOKIE_OPTIONS,
     cookies: {
       getAll() {
         return request.cookies.getAll();

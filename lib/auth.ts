@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { readEnv } from "./env";
+import { AUTH_COOKIE_OPTIONS } from "./auth-cookies";
 
 /**
  * Origin of the request being served.
@@ -49,6 +50,7 @@ export async function createClient() {
     readEnv("NEXT_PUBLIC_SUPABASE_URL")!,
     readEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY")!,
     {
+      cookieOptions: AUTH_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return cookieStore.getAll();
