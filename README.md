@@ -37,9 +37,13 @@ Copy `.env.example` to `.env` locally, and set the same keys in
 | `DIRECT_URL` | For migrations | Supabase **direct** connection (port 5432), used only by drizzle-kit. |
 | `NEXT_PUBLIC_SITE_URL` | **Yes** | Canonical origin. Drives canonical tags, sitemap, and absolute OG image URLs. |
 | `GITHUB_TOKEN` | Strongly recommended | Raises the GitHub API limit from 60/hr per IP to 5,000/hr. Without it both GitHub feeds degrade to cached or empty data. A fine-grained token with **no scopes** is enough. |
-| `RESEND_API_KEY` | Recommended | Enables contact-form email. Without it messages are still stored in Postgres. |
-| `CONTACT_EMAIL` | With Resend | Notification destination. |
-| `CONTACT_FROM` | No | Verified sender. Defaults to the Resend shared sender. |
+| `BREVO_API_KEY` | Recommended | Enables contact-form email. Without it messages are still stored in Postgres. |
+| `CONTACT_EMAIL` | With Brevo | Notification destination. |
+| `CONTACT_FROM` | No | Sender address, verified in Brevo under **Senders & IP**. Defaults to `CONTACT_EMAIL`. |
+
+Brevo is used rather than Resend because it verifies a single sender *address*
+instead of a whole domain, so a personal mailbox works without owning a domain.
+Replies go to the visitor via `Reply-To`, not to the sender address.
 
 ### Why two database URLs
 
