@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import type { ReactNode } from "react";
+import { useIsNarrow } from "./useIsNarrow";
 
 type Direction = "up" | "down" | "left" | "right" | "scale";
 
@@ -28,6 +29,17 @@ const offsets: Record<Direction, { x?: number; y?: number; scale?: number }> = {
 };
 
 /**
+ * Phone viewports get vertical motion only. Horizontal travel pushes a
+ * full-width element past the right edge, which makes the whole page scroll
+ * sideways, and the sideways slide reads as jitter at that size anyway.
+ */
+function resolveOffset(from: Direction, narrow: boolean) {
+  if (!narrow) return offsets[from];
+  if (from === "scale") return { scale: 0.97 };
+  return { y: 20 };
+}
+
+/**
  * Scroll-linked reveal.
  *
  * `once: false` is deliberate: the animation replays whenever the element
@@ -45,6 +57,7 @@ export function Reveal({
   id,
 }: RevealProps) {
   const reduceMotion = useReducedMotion();
+  const narrow = useIsNarrow();
   const MotionTag = motion[as];
 
   // Respect the OS setting: no travel, no fade, no delay.
@@ -54,13 +67,17 @@ export function Reveal({
   }
 
   const variants: Variants = {
-    hidden: { opacity: 0, ...offsets[from] },
+    hidden: { opacity: 0, ...resolveOffset(from, narrow) },
     visible: {
       opacity: 1,
       x: 0,
       y: 0,
       scale: 1,
-      transition: { duration: 0.55, delay, ease: [0.21, 0.6, 0.35, 1] },
+      transition: {
+        duration: narrow ? 0.42 : 0.55,
+        delay: narrow ? 0 : delay,
+        ease: [0.21, 0.6, 0.35, 1],
+      },
     },
   };
 
@@ -93,6 +110,7 @@ export function RevealGroup({
   amount?: number;
 }) {
   const reduceMotion = useReducedMotion();
+  const narrow = useIsNarrow();
 
   if (reduceMotion) return <div className={className}>{children}</div>;
 
@@ -104,7 +122,9 @@ export function RevealGroup({
       viewport={{ once: false, amount }}
       variants={{
         hidden: {},
-        visible: { transition: { staggerChildren: stagger } },
+        // Tighter stagger on phones; long chains feel sluggish when each card
+        // fills the screen.
+        visible: { transition: { staggerChildren: narrow ? stagger * 0.5 : stagger } },
       }}
     >
       {children}
@@ -125,6 +145,7 @@ export function RevealItem({
   as?: "div" | "article" | "li";
 }) {
   const reduceMotion = useReducedMotion();
+  const narrow = useIsNarrow();
   const MotionTag = motion[as];
 
   if (reduceMotion) {
@@ -136,13 +157,13 @@ export function RevealItem({
     <MotionTag
       className={className}
       variants={{
-        hidden: { opacity: 0, ...offsets[from] },
+        hidden: { opacity: 0, ...resolveOffset(from, narrow) },
         visible: {
           opacity: 1,
           x: 0,
           y: 0,
           scale: 1,
-          transition: { duration: 0.5, ease: [0.21, 0.6, 0.35, 1] },
+          transition: { duration: narrow ? 0.4 : 0.5, ease: [0.21, 0.6, 0.35, 1] },
         },
       }}
     >

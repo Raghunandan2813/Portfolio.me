@@ -11,6 +11,7 @@ import {
 } from "motion/react";
 import type { Project } from "../data/portfolio";
 import { ProjectMedia } from "./ProjectMedia";
+import { useIsNarrow } from "./useIsNarrow";
 
 /**
  * Bento archive for the projects page.
@@ -33,6 +34,12 @@ function Tile({
 }) {
   const ref = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
+  const narrow = useIsNarrow();
+  // Parallax is dropped on phones: a tile fills the viewport there, so the
+  // media drifting inside it reads as the layout wobbling rather than depth,
+  // and driving a transform from scroll competes with the browser's own
+  // scrolling on touch.
+  const still = reduceMotion || narrow;
 
   // Progress of this specific tile through the viewport, 0 as it enters from
   // the bottom to 1 as it leaves past the top.
@@ -52,15 +59,19 @@ function Tile({
     <motion.article
       ref={ref}
       className={`bento-tile ${span} ${project.accent} ${featured ? "is-featured" : ""}`}
-      initial={reduceMotion ? undefined : { opacity: 0, y: 42, scale: 0.97 }}
+      initial={reduceMotion ? undefined : { opacity: 0, y: narrow ? 22 : 42, scale: narrow ? 1 : 0.97 }}
       whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: false, amount: 0.18 }}
-      transition={{ ...springy, delay: index * 0.07 }}
-      whileHover={reduceMotion ? undefined : { y: -8 }}
+      viewport={{ once: false, amount: narrow ? 0.08 : 0.18 }}
+      transition={
+        narrow
+          ? { duration: 0.45, ease: [0.21, 0.6, 0.35, 1], delay: index * 0.05 }
+          : { ...springy, delay: index * 0.07 }
+      }
+      whileHover={still ? undefined : { y: -8 }}
     >
       <span className="bento-sheen" aria-hidden="true" />
 
-      <motion.div className="bento-media" style={reduceMotion ? undefined : { y: mediaY }}>
+      <motion.div className="bento-media" style={still ? undefined : { y: mediaY }}>
         <ProjectMedia project={project} compact={!featured} />
       </motion.div>
 
@@ -91,6 +102,7 @@ function Tile({
 
 export function ProjectBento({ projects }: { projects: Project[] }) {
   const reduceMotion = useReducedMotion();
+  const narrow = useIsNarrow();
   const ref = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -104,7 +116,7 @@ export function ProjectBento({ projects }: { projects: Project[] }) {
 
   return (
     <div className="bento-wrap" ref={ref} id="case-studies">
-      {!reduceMotion && (
+      {!reduceMotion && !narrow && (
         <motion.span className="bento-glow" style={{ y: glowY }} aria-hidden="true" />
       )}
       <div className="bento-grid">
