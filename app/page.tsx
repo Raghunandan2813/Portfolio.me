@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BannerScene } from "./components/BannerScene";
+import { Carousel } from "./components/Carousel";
 import { ContactForm } from "./components/ContactForm";
 import { ExperienceDetails } from "./components/ExperienceDetails";
 import { GithubActivity } from "./components/GithubActivity";
@@ -94,8 +95,12 @@ export default async function Home() {
               <div><span className="eyebrow">Featured work · Bento showcase</span><h2>See what I actually built.</h2><p>Each product has a dedicated case-study page and an on-site demo-video slot.</p></div>
               <Link href="/projects">View all projects ↗</Link>
             </div>
+            {/* The bento grid is a three-slot layout: .bento-1 spans wide with
+                .bento-2/.bento-3 beside it. Anything past the third has no
+                slot, so the overflow goes into a carousel rather than
+                rendering unstyled. */}
             <RevealGroup className="work-bento" stagger={0.1}>
-              {projects.map((project, index) => (
+              {projects.slice(0, 3).map((project, index) => (
                 <RevealItem className={`bento-project bento-${index + 1}`} key={project.slug} from={index % 2 === 0 ? "left" : "right"}>
                   <ProjectMedia project={project} compact={index > 0} />
                   <div className="bento-project-copy">
@@ -108,6 +113,26 @@ export default async function Home() {
                 </RevealItem>
               ))}
             </RevealGroup>
+
+            {projects.length > 3 && (
+              <div className="work-overflow">
+                <span className="eyebrow">More work</span>
+                <Carousel label="More projects">
+                  {projects.slice(3).map((project) => (
+                    <div className="bento-project bento-carousel" key={project.slug}>
+                      <ProjectMedia project={project} compact />
+                      <div className="bento-project-copy">
+                        <span>{project.category}</span>
+                        <h3>{project.shortTitle}</h3>
+                        <p>{project.summary}</p>
+                        <div className="bento-tags">{project.stack.slice(0, 3).map((item) => <i key={item}>{item}</i>)}</div>
+                        <Link href={`/projects/${project.slug}`}>Open case study <b>↗</b></Link>
+                      </div>
+                    </div>
+                  ))}
+                </Carousel>
+              </div>
+            )}
           </Reveal>
 
           <Reveal as="section" className="feed-card github-feed" id="projects">
@@ -182,9 +207,11 @@ export default async function Home() {
                 <div><span className="placeholder-avatar">+</span><p><strong>References available on request</strong><small>Add a real quote, name, role, company, and profile link.</small></p></div>
               </div>
             ) : (
-              <RevealGroup className="testimonial-list" stagger={0.08}>
+              // One testimonial needs no carousel; the component hides its own
+              // controls for a single slide, so this stays a plain card.
+              <Carousel label="Testimonials" autoPlay={9000}>
                 {testimonials.map((testimonial) => (
-                  <RevealItem className="testimonial-card" key={testimonial.id} as="article" from="up">
+                  <article className="testimonial-card" key={testimonial.id}>
                     <span className="quote-mark">“</span>
                     {testimonial.rating > 0 && (
                       <div className="testimonial-stars" aria-label={`${testimonial.rating} out of 5`}>
@@ -220,9 +247,9 @@ export default async function Home() {
                         )}
                       </p>
                     </div>
-                  </RevealItem>
+                  </article>
                 ))}
-              </RevealGroup>
+              </Carousel>
             )}
           </Reveal>
 

@@ -745,8 +745,49 @@ body, .feed-card, .side-card, .profile-card, .contribution-card, .bento-project,
 
 .testimonials-feed { padding-bottom: 18px; }
 
+/* --- Carousel -------------------------------------------------------------
+   Native scroll-snap: touch swipe, momentum and keyboard scrolling all come
+   from the browser rather than being reimplemented.
+   ------------------------------------------------------------------------ */
+.carousel { min-width: 0; }
+.carousel-track {
+  display: flex; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  /* The dots are the affordance; a scrollbar under the cards reads as chrome. */
+}
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+
+.carousel-controls {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin-top: 14px;
+}
+.carousel-controls > button {
+  width: 30px; height: 30px; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 50%;
+  background: var(--surface); color: var(--ink);
+  font-size: 17px; line-height: 1; cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+.carousel-controls > button:hover { border-color: var(--primary); color: var(--primary); }
+.carousel-dots { display: flex; align-items: center; gap: 6px; }
+.carousel-dots button {
+  width: 7px; height: 7px; padding: 0;
+  border: 0; border-radius: 50%; background: var(--line);
+  cursor: pointer; transition: background .2s ease, width .2s ease;
+}
+.carousel-dots button.is-on { width: 18px; border-radius: 4px; background: var(--primary); }
+
+/* Projects past the bento's three slots. */
+.work-overflow { margin: 20px 18px 0; padding-top: 18px; border-top: 1px solid var(--line); }
+.work-overflow > .eyebrow { display: block; margin-bottom: 12px; }
+/* Breathing room between neighbouring slides while scroll-snapped. */
+.bento-carousel { margin-inline: 2px; }
+
 /* --- Testimonials --------------------------------------------------------- */
 .testimonial-list { display: grid; gap: 13px; margin: 0 18px; min-width: 0; }
+/* The carousel supplies the horizontal rhythm; the card only needs insetting. */
+.testimonials-feed .carousel { margin: 0 18px; }
 .testimonial-card {
   position: relative; min-width: 0; overflow: hidden;
   padding: 30px 34px; border: 1px solid var(--line); border-radius: 14px;
