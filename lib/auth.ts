@@ -1,6 +1,23 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { readEnv } from "./env";
+
+/**
+ * Origin of the request being served.
+ *
+ * The magic-link callback is built from this rather than NEXT_PUBLIC_SITE_URL,
+ * which is a single fixed value and so is wrong somewhere by definition: it
+ * cannot be localhost, a Vercel preview domain and production at once. Reading
+ * the live request means the link always returns to wherever you signed in.
+ */
+export async function requestOrigin() {
+  const headerList = await headers();
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host");
+  const proto =
+    headerList.get("x-forwarded-proto") ??
+    (host?.startsWith("localhost") || host?.startsWith("127.0.0.1") ? "http" : "https");
+  return `${proto}://${host}`;
+}
 
 /**
  * Admin authentication.

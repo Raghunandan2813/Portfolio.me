@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { adminEmail, createClient, getAdmin, supabaseConfigured } from "@/lib/auth";
-import { absoluteUrl } from "@/lib/site";
+import { adminEmail, createClient, getAdmin, requestOrigin, supabaseConfigured } from "@/lib/auth";
 import { LoginForm } from "./LoginForm";
 
 // Never index the admin area.
@@ -40,7 +39,7 @@ export default async function LoginPage({
     const supabase = await createClient();
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: absoluteUrl("/admin/callback") },
+      options: { emailRedirectTo: `${await requestOrigin()}/admin/callback` },
     });
 
     redirect(sendError ? "/admin/login?error=send" : "/admin/login?sent=1");
