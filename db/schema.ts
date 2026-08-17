@@ -42,6 +42,8 @@ export const experiences = pgTable("experiences", {
   description: text("description"),
   points: jsonb("points").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   skills: jsonb("skills").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  /** See the note on `projects.published`. */
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -84,6 +86,18 @@ export const projectsTable = pgTable("projects", {
   demoLength: text("demo_length"),
   /** Drives the card's colour treatment: violet | blue | orange. */
   accent: text("accent").notNull().default("violet"),
+  /**
+   * Visible on the public site. Hiding is deliberately not deleting: a project
+   * that is out of season, under NDA, or simply not worth leading with should
+   * be recoverable with one click, and its case-study text is expensive to
+   * retype. Unpublished rows are filtered out of every public read — the feed,
+   * the archive, `/projects/[slug]`, and the sitemap — but remain in the admin
+   * list, so the only thing hiding costs is a row nobody outside can reach.
+   *
+   * Defaults to true so existing rows stay live through the migration and new
+   * entries publish on save, which is the common case.
+   */
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -113,6 +127,8 @@ export const testimonials = pgTable("testimonials", {
   rating: integer("rating").notNull().default(5),
   photoUrl: text("photo_url"),
   linkedinUrl: text("linkedin_url"),
+  /** See the note on `projects.published`. */
+  published: boolean("published").notNull().default(true),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

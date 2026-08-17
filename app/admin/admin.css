@@ -133,6 +133,40 @@
 }
 .admin-item > .admin-form-wrap { padding: 0 15px 15px; }
 
+/* --- Show / hide ---
+   The toggle is a sibling of <details>, not a child of <summary>, because a
+   <form> is flow content and is invalid inside a summary. Absolute positioning
+   puts it back where it belongs visually — on the header row, reachable
+   without expanding the entry. */
+.admin-entry { position: relative; }
+.admin-entry > .admin-item > summary { padding-right: 78px; }
+
+.admin-visibility { position: absolute; top: 9px; right: 11px; }
+.admin-visibility button {
+  min-width: 58px;
+  padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface-2); color: var(--muted);
+  font: inherit; font-size: 10px; font-weight: 850;
+  text-transform: uppercase; letter-spacing: .06em; cursor: pointer;
+}
+.admin-visibility button:hover { border-color: var(--primary); color: var(--primary); }
+.admin-visibility button:disabled { opacity: .55; cursor: progress; }
+/* Restoring is the reassuring action, so it reads as such. */
+.admin-visibility button.is-restore {
+  border-color: color-mix(in srgb, var(--emerald) 40%, transparent);
+  background: var(--emerald-wash); color: var(--emerald);
+}
+
+/* A hidden entry stays legible but visibly demoted, so the list reads at a
+   glance without opening anything. */
+.admin-item.is-hidden { border-style: dashed; background: var(--surface-2); }
+.admin-item.is-hidden > summary strong { color: var(--muted); }
+/* Only the first badge claims the free space; a second one sits beside it
+   rather than splitting the gap with the first. */
+.admin-item > summary i + i { margin-left: 0; }
+.admin-item > summary i.badge-hidden { background: var(--surface-3); color: var(--soft); }
+.admin-hidden-count { color: var(--ink); font-weight: 850; }
+
 .admin-delete { padding: 0 15px 15px; }
 .admin-delete button {
   padding: 7px 13px; border: 1px solid #e5484d33; border-radius: 999px;

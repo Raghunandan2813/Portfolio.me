@@ -48,8 +48,12 @@ export async function listProjects(): Promise<Project[]> {
       .from(projectsTable)
       .orderBy(asc(projectsTable.sortOrder), asc(projectsTable.id));
     // An empty table on a fresh database should not blank the site.
+    //
+    // Emptiness is judged before the `published` filter, deliberately: hiding
+    // every project is a choice, and falling back to the bundled array there
+    // would resurrect exactly the projects that were just hidden.
     if (rows.length === 0) return fallbackProjects;
-    return rows.map(toProject);
+    return rows.filter((row) => row.published).map(toProject);
   } catch (error) {
     console.error("Failed to load projects, serving bundled copy", error);
     return fallbackProjects;
@@ -73,7 +77,10 @@ export async function getProject(slug: string): Promise<Project | null> {
       .from(projectsTable)
       .where(eq(projectsTable.slug, slug))
       .limit(1);
-    if (row) return toProject(row);
+    // A hidden project 404s rather than falling through to the bundled copy:
+    // hiding has to hide the case-study page too, or the row is off the feed
+    // while its URL stays live and indexed.
+    if (row) return row.published ? toProject(row) : null;
   } catch (error) {
     console.error("Failed to load project, falling back", error);
   }

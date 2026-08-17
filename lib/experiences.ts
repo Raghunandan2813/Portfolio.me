@@ -21,6 +21,8 @@ export type Experience = {
   description: string | null;
   points: string[];
   skills: string[];
+  /** Always true in the public feed; the admin list uses it to mark hidden rows. */
+  published: boolean;
 };
 
 function toExperience(row: ExperienceRow): Experience {
@@ -38,11 +40,11 @@ function toExperience(row: ExperienceRow): Experience {
     description: row.description,
     points: Array.isArray(row.points) ? row.points : [],
     skills: Array.isArray(row.skills) ? row.skills : [],
+    published: row.published,
   };
 }
 
-export async function listExperiences(): Promise<Experience[]> {
-  return buildCached("experiences", async () => {
+async function loadExperiences(): Promise<Experience[]> {
   try {
     const db = await getDb();
     const rows = await db
@@ -55,5 +57,18 @@ export async function listExperiences(): Promise<Experience[]> {
     console.error("Failed to load experiences", error);
     return [];
   }
-  });
+}
+
+/** Public feed: published roles only. */
+export async function listExperiences(): Promise<Experience[]> {
+  const rows = await buildCached("experiences", loadExperiences);
+  return rows.filter((row) => row.published);
+}
+
+/**
+ * Admin list: every role, hidden ones included. Uncached — the dashboard is
+ * `force-dynamic` and has to show a toggle taking effect on the next render.
+ */
+export async function listAllExperiences(): Promise<Experience[]> {
+  return loadExperiences();
 }

@@ -64,7 +64,7 @@ export async function listTestimonials(): Promise<Testimonial[]> {
       .select()
       .from(testimonials)
       .orderBy(asc(testimonials.sortOrder), asc(testimonials.id));
-    return rows.map(toTestimonial);
+    return rows.filter((row) => row.published).map(toTestimonial);
   } catch (error) {
     // The placeholder card renders instead, which is what the section showed
     // before any testimonial existed.

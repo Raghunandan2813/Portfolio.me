@@ -87,6 +87,29 @@ export async function deleteExperience(formData: FormData) {
   revalidatePath("/admin");
 }
 
+/**
+ * Reads the requested visibility off the form.
+ *
+ * Sent explicitly rather than read-then-flip: two clicks landing together on a
+ * toggle that inverts whatever it finds cancel out, whereas "set to false"
+ * applied twice is still false.
+ */
+function readPublished(formData: FormData) {
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) throw new Error("Invalid id");
+  return { id, published: formData.get("published") === "true" };
+}
+
+export async function setExperiencePublished(formData: FormData) {
+  await requireAdmin();
+  const { id, published } = readPublished(formData);
+
+  const db = await getDb();
+  await db.update(experiences).set({ published }).where(eq(experiences.id, id));
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
 /* --- Projects ------------------------------------------------------------- */
 
 /** URL-safe slug. Also applied to whatever is typed, so a title can be pasted. */
@@ -155,6 +178,10 @@ function revalidateProject(slug: string, previousSlug?: string) {
   // A renamed project leaves its old URL cached; clear that too.
   if (previousSlug && previousSlug !== slug) revalidatePath(`/projects/${previousSlug}`);
   revalidatePath("/admin");
+  // The sitemap is built from the same list, so hiding a project has to drop
+  // its URL from there as well — otherwise Google keeps crawling a page that
+  // now returns 404.
+  revalidatePath("/sitemap.xml");
 }
 
 export async function createProject(formData: FormData) {
@@ -197,6 +224,23 @@ export async function deleteProject(formData: FormData) {
     .limit(1);
 
   await db.delete(projectsTable).where(eq(projectsTable.id, id));
+  revalidateProject(existing?.slug ?? "");
+}
+
+export async function setProjectPublished(formData: FormData) {
+  await requireAdmin();
+  const { id, published } = readPublished(formData);
+
+  const db = await getDb();
+  const [existing] = await db
+    .select({ slug: projectsTable.slug })
+    .from(projectsTable)
+    .where(eq(projectsTable.id, id))
+    .limit(1);
+
+  await db.update(projectsTable).set({ published }).where(eq(projectsTable.id, id));
+  // Hiding changes /projects/[slug] from a page to a 404, so that path needs
+  // clearing as much as the listings do.
   revalidateProject(existing?.slug ?? "");
 }
 
@@ -250,6 +294,16 @@ export async function deleteTestimonial(formData: FormData) {
 
   const db = await getDb();
   await db.delete(testimonials).where(eq(testimonials.id, id));
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function setTestimonialPublished(formData: FormData) {
+  await requireAdmin();
+  const { id, published } = readPublished(formData);
+
+  const db = await getDb();
+  await db.update(testimonials).set({ published }).where(eq(testimonials.id, id));
   revalidatePath("/");
   revalidatePath("/admin");
 }

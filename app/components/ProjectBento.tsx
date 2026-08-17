@@ -10,6 +10,7 @@ import {
   useTransform,
 } from "motion/react";
 import type { Project } from "../data/portfolio";
+import { Carousel } from "./Carousel";
 import { ProjectMedia } from "./ProjectMedia";
 import { useIsNarrow } from "./useIsNarrow";
 
@@ -19,7 +20,14 @@ import { useIsNarrow } from "./useIsNarrow";
  * "Flow motion" here is scroll-linked rather than fire-once: each tile's media
  * drifts at its own rate as the tile passes through the viewport, so the grid
  * keeps moving with the scroll instead of animating in and then sitting still.
+ *
+ * The grid holds exactly three tiles, which is the layout it is built for: one
+ * wide feature with two beside it. Everything past the third goes into a
+ * carousel rather than continuing down the page — an archive that grows a
+ * screen taller with every project added stops being an archive.
  */
+
+const GRID_SIZE = 3;
 
 const springy = { type: "spring" as const, stiffness: 260, damping: 26 };
 
@@ -77,7 +85,7 @@ function Tile({
 
       <div className="bento-copy">
         <div className="bento-meta">
-          <span className="bento-index">0{index + 1}</span>
+          <span className="bento-index">{String(index + 1).padStart(2, "0")}</span>
           <span className="bento-category">{project.category}</span>
         </div>
         <h2>{project.title}</h2>
@@ -112,7 +120,10 @@ export function ProjectBento({ projects }: { projects: Project[] }) {
   const glowY = useTransform(scrollYProgress, [0, 1], ["-12%", "26%"]);
 
   // First tile is wide and tall; the other two stack beside it.
-  const spans = ["span-wide", "span-side", "span-side", "span-half", "span-half"];
+  const spans = ["span-wide", "span-side", "span-side"];
+
+  const featured = projects.slice(0, GRID_SIZE);
+  const rest = projects.slice(GRID_SIZE);
 
   return (
     <div className="bento-wrap" ref={ref} id="case-studies">
@@ -120,15 +131,32 @@ export function ProjectBento({ projects }: { projects: Project[] }) {
         <motion.span className="bento-glow" style={{ y: glowY }} aria-hidden="true" />
       )}
       <div className="bento-grid">
-        {projects.map((project, index) => (
-          <Tile
-            key={project.slug}
-            project={project}
-            index={index}
-            span={spans[index] ?? "span-half"}
-          />
+        {featured.map((project, index) => (
+          <Tile key={project.slug} project={project} index={index} span={spans[index]} />
         ))}
       </div>
+
+      {rest.length > 0 && (
+        <div className="bento-more">
+          <div className="bento-more-head">
+            <span className="eyebrow">Archive</span>
+            <h2>
+              {rest.length} more {rest.length === 1 ? "case study" : "case studies"}
+            </h2>
+          </div>
+          <Carousel label="More case studies" autoPlay={7000}>
+            {rest.map((project, index) => (
+              <Tile
+                key={project.slug}
+                project={project}
+                // Continues the numbering from the grid, so 04 follows 03.
+                index={GRID_SIZE + index}
+                span="span-carousel"
+              />
+            ))}
+          </Carousel>
+        </div>
+      )}
     </div>
   );
 }

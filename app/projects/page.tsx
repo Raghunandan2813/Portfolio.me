@@ -21,16 +21,22 @@ export const metadata: Metadata = {
   },
 };
 
-const stats = [
-  { value: "3", label: "shipped products" },
-  { value: "20+", label: "technologies" },
-  { value: "2", label: "demo walkthroughs" },
-];
-
 const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
 export default async function ProjectsPage() {
   const projects = await listProjects();
+
+  // Counted from the live list rather than written down, so adding or hiding a
+  // project cannot leave the hero contradicting the page under it.
+  const stats = [
+    { value: String(projects.length), label: "shipped products" },
+    { value: `${new Set(projects.flatMap((project) => project.stack)).size}+`, label: "technologies" },
+    {
+      value: String(projects.filter((project) => project.demoVideo).length),
+      label: "demo walkthroughs",
+    },
+  ];
+
   return (
     <main className="projects-page page-shell">
       <ProjectsHero projects={projects} stats={stats} resumePath={RESUME_PATH} />

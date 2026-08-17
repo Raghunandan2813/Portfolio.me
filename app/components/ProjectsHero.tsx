@@ -1,19 +1,29 @@
 "use client";
 
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import type { Project } from "../data/portfolio";
+import { ProjectWallet } from "./ProjectWallet";
+import { useIsNarrow } from "./useIsNarrow";
 
 /**
  * Projects hero.
  *
  * The right half used to be empty, which is what made a 510px-tall hero read as
- * a vacant block. It now carries a fanned deck of project cards that float
- * continuously and parallax on scroll, so the space does work: it previews what
- * the page contains instead of padding it.
+ * a vacant block. It now carries a wallet of project cards, so the space does
+ * work: it previews what the page contains instead of padding it.
  */
 
-const headline = ["Three", "products.", "Three", "difficult", "problems."];
+/**
+ * The headline counts the projects out loud, so it has to be derived rather
+ * than written down: hiding one in the admin would otherwise leave the page
+ * saying "Three products." above two of them.
+ */
+const NUMBER_WORDS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+
+function countWord(count: number) {
+  return NUMBER_WORDS[count] ?? String(count);
+}
 
 export function ProjectsHero({
   projects,
@@ -26,13 +36,27 @@ export function ProjectsHero({
 }) {
   const ref = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
+  const narrow = useIsNarrow();
+  // Scroll-linked drift is dropped on phones: the wallet spans the full column
+  // there, so shifting it as you scroll reads as the layout sliding rather than
+  // as depth, and it fights the browser's own scrolling on touch.
+  const still = reduceMotion || narrow;
 
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
-  const deckY = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const deckRotate = useTransform(scrollYProgress, [0, 1], [0, -6]);
+  const deckY = useTransform(scrollYProgress, [0, 1], [0, 110]);
+  const deckRotate = useTransform(scrollYProgress, [0, 1], [0, -4]);
+
+  const word = countWord(projects.length);
+  const headline = [
+    word,
+    projects.length === 1 ? "product." : "products.",
+    word,
+    "difficult",
+    projects.length === 1 ? "problem." : "problems.",
+  ];
 
   return (
     <motion.section
@@ -46,19 +70,23 @@ export function ProjectsHero({
         <div className="hero-copy">
           <span className="eyebrow">Product archive · 2025-2026</span>
 
-          {/* Word-by-word rise, so the headline arrives rather than appears. */}
+          {/* Word-by-word rise, so the headline arrives rather than appears.
+              The separator sits outside the span deliberately: .hero-word is an
+              inline-block, and a trailing space inside one is trimmed as
+              end-of-line whitespace, which ran the words together. */}
           <h1>
             {headline.map((word, index) => (
-              <motion.span
-                key={`${word}-${index}`}
-                className={index >= 2 ? "hero-word muted-word" : "hero-word"}
-                initial={reduceMotion ? undefined : { opacity: 0, y: 26 }}
-                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 + index * 0.07, duration: 0.5, ease: [0.21, 0.6, 0.35, 1] }}
-              >
-                {word}
+              <Fragment key={`${word}-${index}`}>
+                <motion.span
+                  className={index >= 2 ? "hero-word muted-word" : "hero-word"}
+                  initial={reduceMotion ? undefined : { opacity: 0, y: 26 }}
+                  animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 + index * 0.07, duration: 0.5, ease: [0.21, 0.6, 0.35, 1] }}
+                >
+                  {word}
+                </motion.span>
                 {index === 1 ? <br /> : " "}
-              </motion.span>
+              </Fragment>
             ))}
           </h1>
 
@@ -101,45 +129,13 @@ export function ProjectsHero({
           </div>
         </div>
 
-        {/* Fanned deck: one card per project, each drifting on its own loop. */}
+        {/* One card per project, stacked in a wallet with the current one
+            pulled out. */}
         <motion.div
           className="hero-deck"
-          style={reduceMotion ? undefined : { y: deckY, rotate: deckRotate }}
-          aria-hidden="true"
+          style={still ? undefined : { y: deckY, rotate: deckRotate }}
         >
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.slug}
-              className={`deck-card deck-${index + 1} ${project.accent}`}
-              initial={reduceMotion ? undefined : { opacity: 0, y: 40, rotate: 0 }}
-              animate={
-                reduceMotion
-                  ? undefined
-                  : { opacity: 1, y: [0, -14, 0], rotate: [-8, -6, -8][index] }
-              }
-              transition={{
-                opacity: { delay: 0.3 + index * 0.12, duration: 0.6 },
-                rotate: { delay: 0.3 + index * 0.12, duration: 0.6 },
-                y: {
-                  duration: 5.2 + index * 0.9,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: index * 0.5,
-                },
-              }}
-              whileHover={reduceMotion ? undefined : { scale: 1.04, rotate: 0 }}
-            >
-              <span className="deck-chip">{project.category}</span>
-              <strong>{project.shortTitle}</strong>
-              <p>{project.tagline}</p>
-              <div className="deck-stack">
-                {project.stack.slice(0, 3).map((item) => (
-                  <i key={item}>{item}</i>
-                ))}
-              </div>
-              <span className="deck-bar" />
-            </motion.div>
-          ))}
+          <ProjectWallet projects={projects} />
         </motion.div>
       </div>
 
