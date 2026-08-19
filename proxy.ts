@@ -53,7 +53,17 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip static assets and image optimisation; running auth on every image
-  // request would add a Supabase round trip per asset.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpe?g|svg|webp|mp4|pdf)$).*)"],
+  /*
+   * Skip static assets and image optimisation; running auth on every image
+   * request would add a Supabase round trip per asset.
+   *
+   * The crawler-facing files matter as much as the images: /robots.txt and
+   * /sitemap.xml are fetched routinely by search engines, and the Google
+   * verification file is re-fetched to confirm ownership. Each was costing
+   * a getUser() round trip to Supabase to decide something that only ever
+   * concerns /admin, so the extension list covers them too.
+   */
+  matcher: [
+    "/((?!_next/static|_next/image|.*\\.(?:png|jpe?g|svg|webp|ico|mp4|pdf|txt|xml|html|webmanifest|woff2?)$).*)",
+  ],
 };
