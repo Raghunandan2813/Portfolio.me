@@ -11,15 +11,27 @@ function normalise(url: string) {
   return url.replace(/\/+$/, "");
 }
 
+function isLocal(url: string) {
+  return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(url.trim());
+}
+
 function resolveSiteUrl() {
-  // An explicit value always wins.
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
   // Vercel sets this to the project's stable production domain (unlike
   // VERCEL_URL, which changes on every deployment and would churn canonical
   // tags). It means the first deploy is already correct before you have had a
   // chance to set NEXT_PUBLIC_SITE_URL by hand.
   const vercelDomain = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+
+  // An explicit value normally wins — except a localhost one on a deployed
+  // build, which is a leftover from local development rather than an
+  // intention. That case is not cosmetic: every canonical tag would point at
+  // a machine Google cannot reach, which is enough on its own to keep the
+  // site out of the index. Preferring the real domain makes the misconfigured
+  // deploy correct instead of silently unindexable.
+  if (explicit && !(isLocal(explicit) && vercelDomain)) return explicit;
+
   if (vercelDomain) return `https://${vercelDomain}`;
 
   return FALLBACK_SITE_URL;
@@ -62,6 +74,67 @@ export const OG_IMAGE = {
   height: 630,
   alt: "Raghunandan Kumar — Full Stack & Agentic AI Engineer",
 };
+
+/**
+ * Trims copy to what a search result actually shows.
+ *
+ * Google renders roughly 155-160 characters of a description on desktop and
+ * less on mobile. A case-study summary runs several times that, and an
+ * over-long description is not merely clipped — Google is more likely to
+ * discard it and synthesise a snippet from the page body instead, which loses
+ * control of the wording entirely. Cutting on a word boundary keeps the
+ * sentence readable rather than ending mid-word.
+ */
+export function metaDescription(text: string, limit = 155) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= limit) return clean;
+
+  const cut = clean.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(" ");
+  // Only honour the word boundary if it is not so early that the description
+  // becomes a fragment; otherwise take the hard cut.
+  const end = lastSpace > limit * 0.6 ? lastSpace : limit;
+  return `${clean.slice(0, end).replace(/[\s,;:.\-–—]+$/, "")}…`;
+}
+
+/**
+ * Open Graph and Twitter blocks for a page.
+ *
+ * Next merges metadata shallowly: a page that declares its own `openGraph`
+ * replaces the parent's outright rather than inheriting the missing fields.
+ * Both project routes had done exactly that and so shipped with no og:image at
+ * all, meaning every shared case-study link rendered as a bare text row. This
+ * helper exists so the image cannot be dropped by omission again.
+ */
+export function socialMeta({
+  title,
+  description,
+  path,
+  type = "website",
+}: {
+  title: string;
+  description: string;
+  path: string;
+  type?: "website" | "article" | "profile";
+}) {
+  return {
+    openGraph: {
+      type,
+      siteName: SITE_NAME,
+      url: path,
+      title,
+      description,
+      locale: "en_IN",
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image" as const,
+      title,
+      description,
+      images: [OG_IMAGE.url],
+    },
+  };
+}
 
 export function absoluteUrl(path = "/") {
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;

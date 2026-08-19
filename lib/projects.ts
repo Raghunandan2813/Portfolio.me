@@ -18,6 +18,13 @@ import { projects as fallbackProjects } from "@/app/data/portfolio";
  * showing content that is merely out of date.
  */
 
+/**
+ * Stand-in timestamp for the bundled projects, used only when the database is
+ * unreachable. Fixed rather than `new Date()` so a string of failed reads does
+ * not advertise a fresh edit on every crawl.
+ */
+const BUNDLED_AT = new Date("2026-08-01T00:00:00Z");
+
 function toProject(row: ProjectRow): Project {
   return {
     slug: row.slug,
@@ -85,6 +92,45 @@ export async function getProject(slug: string): Promise<Project | null> {
     console.error("Failed to load project, falling back", error);
   }
   return fallbackProjects.find((project) => project.slug === slug) ?? null;
+}
+
+/**
+ * Slugs and their timestamps, for the sitemap.
+ *
+ * Selected separately from `listProjects()` because the `Project` shape is what
+ * the pages render and carries no timestamp. Stamping every URL with the
+ * current time instead — which is what the sitemap did — is the pattern Google
+ * treats as noise and then ignores, so a genuinely updated page stops being
+ * distinguishable from an untouched one.
+ */
+export async function listProjectSitemapEntries(): Promise<
+  { slug: string; lastModified: Date }[]
+> {
+  try {
+    const db = await getDb();
+    const rows = await db
+      .select({
+        slug: projectsTable.slug,
+        published: projectsTable.published,
+        createdAt: projectsTable.createdAt,
+      })
+      .from(projectsTable)
+      .orderBy(asc(projectsTable.sortOrder), asc(projectsTable.id));
+
+    if (rows.length === 0) {
+      return fallbackProjects.map((project) => ({
+        slug: project.slug,
+        lastModified: BUNDLED_AT,
+      }));
+    }
+
+    return rows
+      .filter((row) => row.published)
+      .map((row) => ({ slug: row.slug, lastModified: row.createdAt }));
+  } catch (error) {
+    console.error("Failed to load sitemap entries", error);
+    return fallbackProjects.map((project) => ({ slug: project.slug, lastModified: BUNDLED_AT }));
+  }
 }
 
 /** Rows for the admin list, including the id the forms need. */

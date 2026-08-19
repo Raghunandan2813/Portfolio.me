@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProjectMedia } from "../../components/ProjectMedia";
 import { Reveal } from "../../components/Reveal";
 import { getProject, listProjects } from "@/lib/projects";
-import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd } from "@/lib/site";
+import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, metaDescription, socialMeta } from "@/lib/site";
 
 type ProjectPageProps = { params: Promise<{ slug: string }> };
 
@@ -19,17 +19,21 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   if (!project) return {};
 
   const url = `/projects/${project.slug}`;
+  // A case-study summary is written for the page, not for a search result, so
+  // it is several times the length Google will show.
+  const description = metaDescription(project.summary);
+
   return {
     // The root layout's title template appends "| Raghunandan Kumar".
     title: project.title,
-    description: project.summary,
+    description,
     alternates: { canonical: url },
-    openGraph: {
-      title: `${project.title} | Raghunandan Kumar`,
-      description: project.summary,
-      url,
+    ...socialMeta({
+      title: `${project.title} | ${SITE_NAME}`,
+      description,
+      path: url,
       type: "article",
-    },
+    }),
   };
 }
 

@@ -8,22 +8,67 @@
  *
  * Usage: npm run og:generate   (re-run whenever the headline copy changes)
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import React from "react";
+import sharp from "sharp";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const outputPath = resolve(here, "..", "public", "og.png");
+const publicDir = resolve(here, "..", "public");
+const outputPath = resolve(publicDir, "og.png");
 
-const INK = "#f8fafc";
-const MUTED = "#9fb4c7";
-const BLUE = "#0a66c2";
-const PURPLE = "#7c3aed";
+/**
+ * Palette taken from the site's dark theme. The card previously used a blue
+ * and violet scheme that appears nowhere on the site, so a shared link looked
+ * like it belonged to a different project.
+ */
+const INK = "#f4f4f4";
+const MUTED = "#a3a3a3";
+const AMBER = "#ffd400";
+const AMBER_DEEP = "#ff8c00";
+const BRAND = "#ffe400";
+
+/**
+ * The face, cut to a circle and embedded as a data URI.
+ *
+ * A photo outperforms a monogram in a link preview for the same reason it does
+ * in a tab: the card is competing for attention in a feed, and a face is what
+ * a person stops on. It is also the same image search associates with the
+ * Person entity, which reinforces rather than splits the signal.
+ */
+async function facePng(size) {
+  const disc = Buffer.from(
+    `<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">` +
+      `<circle cx="512" cy="512" r="500" fill="#fff"/></svg>`,
+  );
+  const flattened = await sharp(await readFile(resolve(publicDir, "profile.jpeg")))
+    .composite([{ input: disc, blend: "dest-in" }])
+    .flatten({ background: BRAND })
+    .png()
+    .toBuffer();
+
+  const circle = Buffer.from(
+    `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">` +
+      `<circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="#fff"/></svg>`,
+  );
+  const cropped = await sharp(flattened)
+    .extract({ left: 120, top: 70, width: 740, height: 740 })
+    .resize(size, size, { fit: "cover", kernel: "lanczos3" })
+    .png()
+    .toBuffer();
+
+  const masked = await sharp(cropped)
+    .composite([{ input: circle, blend: "dest-in" }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+
+  return `data:image/png;base64,${masked.toString("base64")}`;
+}
 
 const h = React.createElement;
 
-function Card() {
+function Card(faceSrc) {
   return h(
     "div",
     {
@@ -34,8 +79,8 @@ function Card() {
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "72px",
-        backgroundColor: "#08131f",
-        backgroundImage: `radial-gradient(circle at 85% 15%, ${BLUE}66, transparent 45%), radial-gradient(circle at 12% 88%, ${PURPLE}55, transparent 45%)`,
+        backgroundColor: "#0a0a0a",
+        backgroundImage: `radial-gradient(circle at 88% 12%, ${AMBER}2e, transparent 46%), radial-gradient(circle at 10% 92%, ${AMBER_DEEP}2a, transparent 44%)`,
         fontFamily: "sans-serif",
       },
     },
@@ -43,25 +88,12 @@ function Card() {
     h(
       "div",
       { style: { display: "flex", alignItems: "center" } },
-      h(
-        "div",
-        {
-          style: {
-            width: "84px",
-            height: "84px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "20px",
-            backgroundImage: `linear-gradient(140deg, ${BLUE}, ${PURPLE})`,
-            color: "#ffffff",
-            fontSize: "36px",
-            fontWeight: 900,
-            letterSpacing: "-2px",
-          },
-        },
-        "RK",
-      ),
+      h("img", {
+        src: faceSrc,
+        width: 96,
+        height: 96,
+        style: { borderRadius: "50%" },
+      }),
       h(
         "div",
         {
@@ -97,7 +129,7 @@ function Card() {
         {
           style: {
             marginTop: "20px",
-            color: "#8dd1ff",
+            color: AMBER,
             fontSize: "38px",
             fontWeight: 700,
             letterSpacing: "-1px",
@@ -133,9 +165,9 @@ function Card() {
               marginRight: "14px",
               padding: "12px 22px",
               borderRadius: "999px",
-              border: "1px solid #2b4661",
-              backgroundColor: "#102438",
-              color: "#cee8ff",
+              border: "1px solid #333333",
+              backgroundColor: "#151515",
+              color: "#e5e5e5",
               fontSize: "23px",
             },
           },
@@ -167,7 +199,10 @@ async function main() {
     process.exit(1);
   }
 
-  const response = new ImageResponse(Card(), { width: 1200, height: 630 });
+  const response = new ImageResponse(Card(await facePng(192)), {
+    width: 1200,
+    height: 630,
+  });
   const buffer = Buffer.from(await response.arrayBuffer());
 
   await mkdir(dirname(outputPath), { recursive: true });

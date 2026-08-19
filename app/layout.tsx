@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BirdFlight } from "./components/BirdFlight";
 import { CursorCat } from "./components/CursorCat";
@@ -9,7 +9,6 @@ import {
   CONTACT_EMAIL,
   GITHUB_PROFILE_URL,
   LINKEDIN_URL,
-  OG_IMAGE,
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_TITLE,
@@ -17,6 +16,7 @@ import {
   PROFILE_PHOTO,
   absoluteUrl,
   jsonLd,
+  socialMeta,
 } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -42,27 +42,33 @@ export const metadata: Metadata = {
     "India",
   ],
   alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    url: SITE_URL,
+  // Shared with every other route through one helper, so no page can define a
+  // partial openGraph block and silently lose the preview image — Next
+  // replaces the parent's block rather than merging into it.
+  ...socialMeta({
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    locale: "en_IN",
-    images: [OG_IMAGE],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [OG_IMAGE.url],
-  },
+    path: "/",
+  }),
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
-  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+  // Generated from the profile photo by `npm run icons:generate`. The .ico is
+  // listed first and `sizes: "any"` marks it as the fallback, so a client that
+  // understands PNG picks a PNG and one that only ever requests /favicon.ico
+  // still gets something.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: "/favicon.ico",
+  },
+  manifest: "/manifest.webmanifest",
   // Search Console / Bing verification. Set the env vars after claiming the
   // property; the HTML-tag method is the one that survives redeploys.
   verification: {
@@ -71,6 +77,19 @@ export const metadata: Metadata = {
       ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION }
       : undefined,
   },
+};
+
+/**
+ * Separate from `metadata` because Next requires it there — themeColor in the
+ * metadata export is ignored. It tints the browser chrome on Android and the
+ * title bar of an installed app, matching the manifest.
+ */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffe400" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+  colorScheme: "light dark",
 };
 
 const personSchema = {
