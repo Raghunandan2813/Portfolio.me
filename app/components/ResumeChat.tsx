@@ -5,7 +5,7 @@ import { resumeFacts } from "../data/portfolio";
 
 type Message = { role: "assistant" | "user"; text: string };
 
-const starters = ["What has he built?", "What is his AI stack?", "Tell me about TurboML"];
+const starters = ["What has he built?", "What is his AI stack?", "What does he do at Snorkel AI?"];
 
 function tokenize(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9+#.]+/g, " ").split(/\s+/).filter((word) => word.length > 1);
@@ -13,15 +13,33 @@ function tokenize(value: string) {
 
 function answerQuestion(question: string) {
   const words = new Set(tokenize(question));
+  const asked = question.toLowerCase();
   const ranked = resumeFacts
-    .map((fact) => ({
-      fact,
-      score: fact.keywords.reduce((score, keyword) => score + (words.has(keyword) ? 3 : question.toLowerCase().includes(keyword) ? 1 : 0), 0),
-    }))
-    .sort((a, b) => b.score - a.score);
+    .map((fact) => {
+      const score = fact.keywords.reduce(
+        (total, keyword) => total + (words.has(keyword) ? 3 : asked.includes(keyword) ? 1 : 0),
+        0,
+      );
+      /*
+       * Length of the longest keyword that actually matched, used only to
+       * break ties. "Tell me about Mindly AI" matches `about` on the general
+       * summary and `mindly` on the project, both worth 3 — and the broad
+       * answer won purely by sitting earlier in the array. Preferring the
+       * more specific word is what makes a product name beat a connective.
+       */
+      const longest = fact.keywords.reduce(
+        (best, keyword) =>
+          (words.has(keyword) || asked.includes(keyword)) && keyword.length > best
+            ? keyword.length
+            : best,
+        0,
+      );
+      return { fact, score, longest };
+    })
+    .sort((a, b) => b.score - a.score || b.longest - a.longest);
 
   if (!ranked[0] || ranked[0].score === 0) {
-    return "I can answer from Raghunandan's resume about his experience, projects, skills, education, current role, or how to contact him. Try asking: “What did he build at TurboML?”";
+    return "I can answer from Raghunandan's resume about his experience, projects, skills, education, current role, or how to contact him. Try asking: “Tell me about Mindly AI” or “What is his backend stack?”";
   }
   return ranked[0].fact.answer;
 }

@@ -20,9 +20,13 @@ import { skillGroups } from "./data/portfolio";
 import { listExperiences } from "@/lib/experiences";
 import { listProjects } from "@/lib/projects";
 import { listTestimonials } from "@/lib/testimonials";
-import { CONTACT_EMAIL, GITHUB_PROFILE_URL, LINKEDIN_URL } from "@/lib/site";
-
-const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
+import {
+  CONTACT_EMAIL,
+  GITHUB_PROFILE_URL,
+  LINKEDIN_URL,
+  RESUME_FILENAME,
+  RESUME_PATH,
+} from "@/lib/site";
 
 export default async function Home() {
   const [experiences, projects, testimonials] = await Promise.all([
@@ -53,7 +57,7 @@ export default async function Home() {
             <a className="icon-link" href={GITHUB_PROFILE_URL} target="_blank" rel="noreferrer" aria-label="GitHub profile" title="GitHub">
               <GithubIcon />
             </a>
-            <a className="icon-link is-primary" href={RESUME_PATH} download aria-label="Download resume (PDF)" title="Download resume">
+            <a className="icon-link is-primary" href={RESUME_PATH} download={RESUME_FILENAME} aria-label="Download resume (PDF)" title="Download resume">
               <DownloadIcon />
             </a>
           </div>
@@ -239,7 +243,7 @@ export default async function Home() {
           <Reveal as="section" className="side-card open-card" from="right"><span className="side-icon">◎</span><h3>Open to work</h3><p>Full Stack Engineer, AI Engineer, Agentic AI, or a role combining all three.</p><a href={`mailto:${CONTACT_EMAIL}`}>Start a conversation</a></Reveal>
           <Reveal as="section" className="side-card" from="right" delay={0.05}><h3>Current</h3><div className="side-role"><span className="has-mark"><Image src="/logos/snorkel-ai.png" alt="Snorkel AI logo" width={34} height={34} /></span><p><strong>AI Expert</strong><small><a className="company-link" href="https://www.linkedin.com/company/snorkel-ai/" target="_blank" rel="noreferrer">Snorkel AI ↗</a> · Since July 2026</small></p></div><div className="side-role"><span className="has-mark"><Image src="/logos/outlier.svg" alt="Outlier logo" width={34} height={34} /></span><p><strong>AI Engineer &amp; Trainer</strong><small><a className="company-link" href="https://www.linkedin.com/company/try-outlier/" target="_blank" rel="noreferrer">Outlier ↗</a> · Remote</small></p></div></Reveal>
           <Reveal as="section" className="side-card" from="right" delay={0.1}><h3>Education</h3><div className="education-mark has-mark"><Image src="/logos/ggv-crest.png" alt="Guru Ghasidas Vishwavidyalaya crest" width={56} height={56} /></div><strong>B.Tech, Information Technology</strong><p><a className="company-link" href="https://ggu.ac.in/index" target="_blank" rel="noreferrer">Guru Ghasidas Vishwavidyalaya ↗</a><br />2022 - 2026 · Bilaspur</p></Reveal>
-          <Reveal as="section" className="side-card resume-card" from="right" delay={0.15}><span>PDF · 1 page</span><h3>Recruiter-ready resume</h3><p>Experience, technical stack, product highlights, and education in one download.</p><a href={RESUME_PATH} download>Download resume ↓</a></Reveal>
+          <Reveal as="section" className="side-card resume-card" from="right" delay={0.15}><span>PDF · 2 pages</span><h3>Recruiter-ready resume</h3><p>Experience, technical stack, product highlights, and education in one download.</p><a href={RESUME_PATH} download={RESUME_FILENAME}>Download resume ↓</a></Reveal>
           <Reveal as="section" className="side-card ask-card" from="right" delay={0.2}><span>✦</span><h3>Short on time?</h3><p>Use the resume chatbot in the corner and ask about skills, projects, or experience.</p></Reveal>
         </aside>
       </div>

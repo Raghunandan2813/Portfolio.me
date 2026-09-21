@@ -3,7 +3,15 @@ import { ProjectBento } from "../components/ProjectBento";
 import { ProjectsHero } from "../components/ProjectsHero";
 import { Reveal } from "../components/Reveal";
 import { listProjects } from "@/lib/projects";
-import { CONTACT_EMAIL, SITE_NAME, SITE_URL, absoluteUrl, jsonLd, socialMeta } from "@/lib/site";
+import {
+  CONTACT_EMAIL,
+  RESUME_PATH,
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+  jsonLd,
+  socialMeta,
+} from "@/lib/site";
 
 const description =
   "Case studies for Raghunandan Kumar's agentic AI and full-stack products.";
@@ -20,7 +28,6 @@ export const metadata: Metadata = {
   }),
 };
 
-const RESUME_PATH = "/resume/raghunandan-kumar-resume.pdf";
 
 export default async function ProjectsPage() {
   const projects = await listProjects();

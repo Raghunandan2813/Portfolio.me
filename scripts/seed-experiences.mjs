@@ -70,10 +70,13 @@ const rows = [
     sort_order: 1,
   },
   {
-    company: "TurboML",
+    company: "Tubo MI",
     role: "Software Engineering Intern (AI)",
     monogram: "T",
-    logo_url: "/logos/turboml.png",
+    // No logo: the company is offsite and has no website or public mark.
+    // The file that used to sit here was TurboML's actual brand, fetched
+    // from turboml.com — a different company entirely.
+    logo_url: null,
     linkedin_url: null,
     date: "April 2025 - May 2026",
     location: "Remote · California, USA",

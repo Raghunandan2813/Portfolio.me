@@ -205,53 +205,84 @@ export const skillGroups = [
   },
 ];
 
+/**
+ * Answers for the resume chatbot, kept in step with public/resume.
+ *
+ * Deliberately hand-written rather than extracted from the PDF at runtime: the
+ * chat claims to be "grounded in resume", and that claim is only honest if a
+ * human has checked every sentence it can say.
+ */
 export const resumeFacts = [
   {
     id: "summary",
     keywords: ["who", "about", "summary", "profile", "engineer", "introduce", "yourself"],
     answer:
-      "Raghunandan Kumar is a Full Stack and Agentic AI Engineer who builds production-grade LLM pipelines, RAG systems, multi-agent workflows, and real-time web products. His core stack includes Next.js, TypeScript, Node.js, Python, PostgreSQL, LangGraph, and LangChain.",
+      "Raghunandan Kumar is a Full Stack and Agentic AI Engineer with 2+ years of hands-on experience building AI-powered and full-stack applications — LLM pipelines, RAG systems, AI agents, semantic memory, and real-time products. He takes AI products from backend architecture and API integration through to production user interfaces.",
   },
   {
     id: "snorkel",
-    keywords: ["current", "snorkel", "job", "role", "work", "company", "experience"],
+    keywords: ["current", "snorkel", "job", "role", "work", "company", "experience", "now"],
     answer:
-      "Raghunandan currently works as an AI Expert at Snorkel AI, starting in July 2026, with a focus on AI quality and model evaluation.",
+      "Since July 2026 he has been an AI Expert at Snorkel AI (contract, remote). He rebuilt 7+ returned tasks from real merged open-source PRs across Python, TypeScript and Rust, and hardened the grading itself: agents could score a perfect 1.0 by printing graded test IDs without running a test, which he fixed with per-run secret tokens injected into test names at verify time.",
+  },
+  {
+    id: "snorkel-audit",
+    keywords: ["oracle", "forgery", "idempotence", "grading", "audit", "forensics", "review", "integrity"],
+    answer:
+      "At Snorkel AI he runs oracle, base, forgery and idempotence scenarios straight from the packed submission zip to reproduce the real grading environment, catching defects the automated gates scored as passing. One oracle solution was missing 13 of the PR's own test files while still reporting 1.0. He also reviews other contributors' work, once using git forensics — loose objects, missing remote, commit metadata — to show a shipped repo was a fresh git init with a fabricated base commit SHA.",
   },
   {
     id: "outlier",
-    keywords: ["outlier", "trainer", "evaluation", "annotation", "prompt", "safety"],
+    keywords: ["outlier", "trainer", "evaluation", "annotation", "prompt", "safety", "rlhf", "feedback"],
     answer:
-      "At Outlier, Raghunandan worked as an AI Engineer and Trainer, evaluating LLM outputs for quality, accuracy, and safety; providing structured feedback; supporting annotation; and testing model behavior with prompts and edge cases.",
+      "Since June 2026 he has also worked as an AI Engineer and Trainer at Outlier (freelance, remote). He evaluates LLM responses for accuracy, reasoning quality, instruction following, relevance and safety; trains models through structured feedback and comparative evaluation; designs prompts that surface edge cases and failure patterns; and handles annotation and validation for training datasets.",
   },
   {
-    id: "turboml",
-    keywords: ["turbo", "turboml", "intern", "whatsapp", "swiggy", "blinkit", "reminder", "redis"],
+    id: "internship",
+    keywords: ["tubo", "mi", "intern", "internship", "whatsapp", "swiggy", "blinkit", "reminder", "redis", "daemon", "first"],
     answer:
-      "During his AI Software Engineering internship at TurboML from April 2025 to May 2026, Raghunandan built a Redis-based agentic reminder system, multi-tool integrations for Swiggy, Blinkit, and Google APIs, and a WhatsApp Business API command layer.",
+      "From April 2025 to May 2026 he was a Software Engineering Intern (AI) at Tubo MI, remote. He engineered a Redis-backed scheduling engine using Sorted Sets and a purpose-built daemon for sub-second reminder execution within a 24-hour window, unified Swiggy, Blinkit and Google APIs behind an AI-agent tool layer with contextual tool selection, and built a WhatsApp Business bot control interface with /help, /reset and /new commands plus Azure Blob Storage file handling.",
   },
   {
     id: "projects",
-    keywords: ["project", "projects", "built", "portfolio", "saas", "product"],
+    keywords: ["project", "projects", "built", "build", "portfolio", "product", "products", "case"],
     answer:
-      "His featured products are Mindly AI, a persistent-memory agent; AI Interview Coach, a voice and vision interview simulator; and Cognito, an AI-powered browser IDE using WebContainer and CodeMirror.",
+      "Three flagship products: Mindly AI, a persistent-memory agent; AI Interview Coach, a voice-and-vision interview simulator; and Cognito, an AI-powered browser IDE. Each has a full case study on this site with the problem, architecture and source code.",
+  },
+  {
+    id: "mindly",
+    keywords: ["mindly", "memory", "pgvector", "embedding", "graph", "groq", "semantic"],
+    answer:
+      "Mindly AI is a persistent-memory agent built on Next.js 15, React 19, Groq, pgvector, Supabase and Redis. It uses a dual-channel memory system — pgvector semantic search alongside PostgreSQL knowledge graphs — and a four-stage embedding pipeline that fails over automatically across Groq, Gemini, OpenRouter and Ollama. Relationship extraction runs in the background so context stays current without adding user-facing latency.",
+  },
+  {
+    id: "interview",
+    keywords: ["interview", "coach", "voice", "vapi", "face", "transcription", "firebase"],
+    answer:
+      "AI Interview Coach runs low-latency AI voice interviews using the Vapi WebSocket SDK with Next.js 16, with live transcription and a client-side Face-API.js pipeline capturing confidence and focus signals. Feedback comes from an automated evaluation pipeline using Groq (Llama 3.3), the Vercel AI SDK and Zod for schema-validated output, with Firebase tying the workflow together.",
+  },
+  {
+    id: "cognito",
+    keywords: ["cognito", "ide", "browser", "webcontainer", "codemirror", "editor", "terminal", "autocomplete", "refactor", "convex"],
+    answer:
+      "Cognito is a browser-based full-stack IDE using the WebContainer API and xterm.js to run complete Node.js environments client-side with zero server provisioning. Custom CodeMirror 6 extensions provide real-time ghost-text autocomplete and context-aware Cmd+K refactoring via Claude Sonnet 4.6, with Convex handling real-time persistence across sessions.",
   },
   {
     id: "skills",
-    keywords: ["skill", "skills", "stack", "technology", "technologies", "language", "frontend", "backend", "ai", "database"],
+    keywords: ["skill", "skills", "stack", "technology", "technologies", "language", "languages", "frontend", "backend", "database", "tools"],
     answer:
-      "Raghunandan works with TypeScript, JavaScript, Python, C++, SQL, Go, Next.js, React, Node.js, FastAPI, Django, LangGraph, LangChain, RAG, PostgreSQL, Supabase, MongoDB, Redis, Convex, Docker, AWS, Azure, and GCP.",
+      "Languages: TypeScript, JavaScript, Python, C++, SQL and Golang. Frontend: Next.js, React, Tailwind CSS, CodeMirror 6 and HTML5 Canvas. Backend: Node.js, Express, FastAPI, Django, WebSocket, REST and the WhatsApp Business API. Agentic AI: LangChain, LangGraph, RAG pipelines, prompt engineering, Firecrawl and Inngest. Data: PostgreSQL, Supabase with pgvector, MongoDB, Redis and Convex. Tools: Git, Docker, Azure, AWS, GCP, Clerk and Sentry.",
   },
   {
     id: "education",
-    keywords: ["education", "college", "degree", "university", "graduate", "btech"],
+    keywords: ["education", "college", "degree", "university", "graduate", "btech", "study"],
     answer:
-      "Raghunandan completed a B.Tech in Information Technology at Guru Ghasidas Vishwavidyalaya, Bilaspur, from December 2022 to April 2026.",
+      "He is completing a B.Tech in Information Technology at Guru Ghasidas Vishwavidyalaya in Bilaspur, from December 2022 to April 2026.",
   },
   {
     id: "contact",
-    keywords: ["contact", "email", "hire", "reach", "available", "resume", "cv"],
+    keywords: ["contact", "email", "hire", "hiring", "reach", "available", "resume", "cv", "download"],
     answer:
-      "You can contact Raghunandan at raghu9555k@gmail.com, use the contact form on this portfolio, connect on LinkedIn, or download his resume from the profile section.",
+      "Reach him at raghu9555k@gmail.com, use the contact form on this site, or connect on LinkedIn. The full resume is downloadable from the profile section at the top of the page.",
   },
 ];
