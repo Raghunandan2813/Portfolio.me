@@ -49,3 +49,21 @@ export function LoginForm({ action }: { action: (formData: FormData) => Promise<
     </form>
   );
 }
+
+/** Password recovery. Sends Supabase's reset email. */
+export function ResetForm({ action }: { action: (formData: FormData) => Promise<void> }) {
+  return (
+    <form action={action} className="admin-form">
+      <label htmlFor="reset-email">Email</label>
+      <input
+        id="reset-email"
+        name="email"
+        type="email"
+        required
+        autoComplete="email"
+        placeholder="you@example.com"
+      />
+      <Submit idle="Send reset link" busy="Sending…" />
+    </form>
+  );
+}

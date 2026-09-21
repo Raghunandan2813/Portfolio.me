@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { adminEmail, createClient, getAdmin, requestOrigin, supabaseConfigured } from "@/lib/auth";
-import { LoginForm, PasswordForm } from "./LoginForm";
+import { LoginForm, PasswordForm, ResetForm } from "./LoginForm";
 
 // Never index the admin area.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -9,10 +9,10 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string; error?: string }>;
+  searchParams: Promise<{ sent?: string; reset?: string; error?: string }>;
 }) {
   if (await getAdmin()) redirect("/admin");
-  const { sent, error } = await searchParams;
+  const { sent, reset, error } = await searchParams;
 
   if (!supabaseConfigured()) {
     return (
@@ -85,6 +85,33 @@ export default async function LoginPage({
     redirect(`/admin/login?error=${reason}`);
   }
 
+  /**
+   * Password recovery.
+   *
+   * Points at /admin/recover rather than the magic-link callback: that route
+   * lands on the page that actually sets a new password. Without it the
+   * emailed link has nowhere to go and drops you on the site's home page,
+   * which is what it did before this existed.
+   */
+  async function sendReset(formData: FormData) {
+    "use server";
+
+    const email = String(formData.get("email") || "").trim().toLowerCase();
+    if (email !== adminEmail()) redirect("/admin/login?error=denied");
+
+    const supabase = await createClient();
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${await requestOrigin()}/admin/recover`,
+    });
+
+    if (!resetError) redirect("/admin/login?reset=1");
+
+    console.error(
+      `Reset email failed: status=${resetError.status} code=${resetError.code} message=${resetError.message}`,
+    );
+    redirect(`/admin/login?error=${/rate|limit|seconds/i.test(resetError.message) ? "rate" : "send"}`);
+  }
+
   return (
     <main className="admin-shell">
       <div className="admin-auth">
@@ -116,8 +143,30 @@ export default async function LoginPage({
           </p>
         )}
         {sent && <p className="admin-ok">Check your inbox — the link expires shortly.</p>}
+        {reset && (
+          <p className="admin-ok">
+            Reset link sent. Open it in this browser and you can choose a new password.
+          </p>
+        )}
+        {error === "expired" && (
+          <p className="admin-error">
+            That reset link has expired or was already used. Send yourself another.
+          </p>
+        )}
+        {error === "send" && (
+          <p className="admin-error">Could not send the email. Try again shortly.</p>
+        )}
 
         <PasswordForm action={signIn} />
+
+        <details className="admin-alt">
+          <summary>Forgot your password?</summary>
+          <p className="admin-note">
+            Sends a reset link. Open it in this browser — the exchange is tied to the one that
+            asked for it.
+          </p>
+          <ResetForm action={sendReset} />
+        </details>
 
         <details className="admin-alt">
           <summary>Email me a link instead</summary>
